@@ -32,12 +32,12 @@ class ExamData(models.Model):
              ]
     id = models.AutoField(primary_key=True)
     exam_name = models.CharField(max_length=100)
-    exam_month = models.CharField()
+    exam_month = models.CharField(max_length=10)
     exam_year = models.IntegerField()
-    exam_type = models.CharField(max_length=1,choices=types)
+    exam_type = models.CharField(max_length=8,choices=types)
     semester = models.IntegerField()
     declaration_date = models.DateField()
-    academic_year = models.CharField()
+    academic_year = models.CharField(max_length=9)
 
     def __str__(self):
         return self.exam_name
@@ -53,7 +53,7 @@ class BranchSubjectSemester(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     semester = models.IntegerField()
     is_core = models.BooleanField()
-    elective_group = models.CharField(max_length=50, blank=True, null=True)
+    elective_group = models.CharField(max_length=50, blank=True, null=True,choices=type)
 
     def __str__(self):
         return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}"
@@ -65,12 +65,12 @@ class StudentInfo(models.Model):
         ("F","Female")
     ]
     id = models.AutoField(primary_key=True)
-    spid = models.CharField(unique=True,)
-    enrollment = models.CharField(unique=True)
+    spid = models.CharField(unique=True,max_length=10)
+    enrollment = models.CharField(unique=True,max_length=14)
     name = models.CharField(max_length=100)
-    gender = models.CharField(choices=gender_type)  # True for male, False for female (or consider using CharField with choices)
+    gender = models.CharField(choices=gender_type,max_length=6)  # True for male, False for female (or consider using CharField with choices)
     date_of_birth = models.DateField()
-    faculty_name = models.CharField(max_length=100)
+    faculty_name = models.CharField(max_length=100,)
     college_code = models.IntegerField()
     college_name = models.CharField(max_length=100)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
@@ -117,7 +117,7 @@ class Result(models.Model):
     cgpa = models.FloatField()
     backlog = models.IntegerField()
     ufm = models.BooleanField()
-    result = models.CharField(choices=result_choice)
+    result = models.CharField(choices=result_choice,max_length=4)
 
     def __str__(self):
         return f"Result of {self.student_exam.student_info.name} - Exam {self.exam_data.exam_name}"
