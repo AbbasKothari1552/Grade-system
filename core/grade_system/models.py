@@ -23,78 +23,31 @@ class Subject(models.Model):
     def __str__(self):
         return self.subject_name
 
-
-# Student Info Model
-class StudentInfo(models.Model):
-    id = models.AutoField(primary_key=True)
-    spid = models.IntegerField(unique=True)
-    enrollment = models.IntegerField(unique=True)
-    name = models.CharField(max_length=100)
-    gender = models.BooleanField()  # True for male, False for female (or consider using CharField with choices)
-    date_of_birth = models.DateTimeField()
-    faculty_name = models.CharField(max_length=100)
-    college_code = models.IntegerField()
-    college_name = models.CharField(max_length=100)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
-
-
-# Exam Data Model
+#ExamData Model
 class ExamData(models.Model):
+    types=[
+        ("Regular","Regular"),
+        ("Repeater","Repeater"),
+      
+             ]
     id = models.AutoField(primary_key=True)
     exam_name = models.CharField(max_length=100)
-    exam_month = models.IntegerField()
+    exam_month = models.CharField()
     exam_year = models.IntegerField()
-    exam_type = models.IntegerField()
+    exam_type = models.CharField(max_length=1,choices=types)
     semester = models.IntegerField()
     declaration_date = models.DateField()
-    academic_year = models.IntegerField()
+    academic_year = models.CharField()
 
     def __str__(self):
         return self.exam_name
 
-
-# Student Exam Model
-class StudentExam(models.Model):
-    id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(StudentInfo, on_delete=models.CASCADE)
-    exam = models.ForeignKey(ExamData, on_delete=models.CASCADE)
-    seat_no = models.IntegerField()
-
-    def __str__(self):
-        return f"{self.student.name} - {self.exam.exam_name}"
-
-
-# Grade Data Model
-class GradeData(models.Model):
-    id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(StudentInfo, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    grade = models.CharField(max_length=2)
-
-    def __str__(self):
-        return f"{self.student.name} - {self.subject.subject_name}: {self.grade}"
-
-
-# Result Model
-class Result(models.Model):
-    id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(StudentInfo, on_delete=models.CASCADE)
-    exam = models.ForeignKey(ExamData, on_delete=models.CASCADE)
-    sgpa = models.FloatField()
-    cgpa = models.FloatField()
-    backlog = models.IntegerField()
-    ufm = models.IntegerField()
-    result = models.IntegerField()
-
-    def __str__(self):
-        return f"Result of {self.student.name} - Exam {self.exam.exam_name}"
-
-
 # Branch-Subject-Semester Model
 class BranchSubjectSemester(models.Model):
+    type=[
+        ("Professional","Professional"),
+        ("Elective","Elective"),
+    ]
     id = models.AutoField(primary_key=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
@@ -104,3 +57,69 @@ class BranchSubjectSemester(models.Model):
 
     def __str__(self):
         return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}"
+
+# Student Info Model
+class StudentInfo(models.Model):
+    gender_type=[
+        ("M","Male"),
+        ("F","Female")
+    ]
+    id = models.AutoField(primary_key=True)
+    spid = models.CharField(unique=True,)
+    enrollment = models.CharField(unique=True)
+    name = models.CharField(max_length=100)
+    gender = models.CharField(choices=gender_type)  # True for male, False for female (or consider using CharField with choices)
+    date_of_birth = models.DateField()
+    faculty_name = models.CharField(max_length=100)
+    college_code = models.IntegerField()
+    college_name = models.CharField(max_length=100)
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+
+
+
+# Student Exam Model
+class StudentExam(models.Model):
+    id = models.AutoField(primary_key=True)
+    student_info = models.ForeignKey(StudentInfo, on_delete=models.CASCADE)
+    exam_data= models.ForeignKey(ExamData, on_delete=models.CASCADE)
+    seat_no = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.student_info.name} - {self.exam_data.exam_name}"
+
+
+# Grade Data Model
+class GradeData(models.Model):
+    id = models.AutoField(primary_key=True)
+    student_exam= models.ForeignKey(StudentExam, on_delete=models.CASCADE)
+    subject_bss = models.ForeignKey(BranchSubjectSemester, on_delete=models.CASCADE)
+    grade = models.CharField(max_length=2)
+
+    def __str__(self):
+        return f"{self.student_exam.student_info.name} - {self.subject_bss.subject.subject_name}: {self.grade}"
+
+
+# Result Model
+class Result(models.Model):
+    result_choice=[
+        ("Pass","Pass"),
+        ("Fail","Fail"),
+    ]
+    id = models.AutoField(primary_key=True)
+    student_exam = models.ForeignKey(StudentExam, on_delete=models.CASCADE)
+    exam_data = models.ForeignKey(ExamData, on_delete=models.CASCADE)
+    sgpa = models.FloatField()
+    cgpa = models.FloatField()
+    backlog = models.IntegerField()
+    ufm = models.BooleanField()
+    result = models.CharField(choices=result_choice)
+
+    def __str__(self):
+        return f"Result of {self.student_exam.student_info.name} - Exam {self.exam_data.exam_name}"
+
+
