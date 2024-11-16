@@ -17,7 +17,7 @@ class Branch(models.Model):
 class Subject(models.Model):
     id = models.AutoField(primary_key=True)
     subject_code = models.IntegerField(unique=True)
-    subject_name = models.CharField(max_length=100)
+    subject_name = models.CharField(max_length=100, unique=True)
     credits = models.IntegerField()
 
     def __str__(self):
@@ -55,14 +55,17 @@ class BranchSubjectSemester(models.Model):
     is_core = models.BooleanField()
     elective_group = models.CharField(max_length=50, blank=True, null=True,choices=type)
 
+    class Meta:
+        unique_together = ('subject', 'branch', 'semester')
+
     def __str__(self):
         return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}"
 
 # Student Info Model
 class StudentInfo(models.Model):
     gender_type=[
-        ("M","Male"),
-        ("F","Female")
+        ("Male","Male"),
+        ("Female","Female")
     ]
     id = models.AutoField(primary_key=True)
     spid = models.CharField(unique=True,max_length=10)
@@ -112,14 +115,14 @@ class Result(models.Model):
     ]
     id = models.AutoField(primary_key=True)
     student_exam = models.ForeignKey(StudentExam, on_delete=models.CASCADE)
-    exam_data = models.ForeignKey(ExamData, on_delete=models.CASCADE)
+    # exam_data = models.ForeignKey(ExamData, on_delete=models.CASCADE) #removing this column as we can reference through student_exam model.
     sgpa = models.FloatField()
     cgpa = models.FloatField()
-    backlog = models.IntegerField()
+    backlog = models.IntegerField(default=0)
     ufm = models.BooleanField()
     result = models.CharField(choices=result_choice,max_length=4)
 
     def __str__(self):
-        return f"Result of {self.student_exam.student_info.name} - Exam {self.exam_data.exam_name}"
+        return f"Result of {self.student_exam.student_info.name} - Exam {self.student_exam.exam_data.exam_name}"
 
 
