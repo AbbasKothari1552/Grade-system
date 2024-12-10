@@ -71,7 +71,7 @@ class StudentInfo(models.Model):
     spid = models.CharField(unique=True,max_length=10)
     enrollment = models.CharField(unique=True,max_length=14)
     name = models.CharField(max_length=100)
-    gender = models.CharField(choices=gender_type,max_length=6)  # True for male, False for female (or consider using CharField with choices)
+    gender = models.CharField(choices=gender_type,max_length=6)
     date_of_birth = models.DateField()
     faculty_name = models.CharField(max_length=100,)
     college_code = models.IntegerField()
@@ -80,9 +80,6 @@ class StudentInfo(models.Model):
 
     def __str__(self):
         return self.name
-
-
-
 
 
 # Student Exam Model

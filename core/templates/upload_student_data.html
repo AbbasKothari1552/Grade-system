@@ -1,0 +1,27 @@
+<!-- templates/upload_file.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Student Data</title>
+</head>
+<body>
+    <h1>Upload Student Data</h1>
+    <form method="POST" enctype="multipart/form-data", action="{% url 'upload_student_data' %}">
+        {% csrf_token %}
+        <label for="file">Upload Excel File:</label>
+        <input type="file" name="file" accept=".xlsx, .xls" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if errors %}
+        <h2>Errors Found</h2>
+        <ul>
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
