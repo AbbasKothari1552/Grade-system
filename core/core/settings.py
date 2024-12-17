@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'grade_system',
+    'upload_data',
 ]
 
 MIDDLEWARE = [
