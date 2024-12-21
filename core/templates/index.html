@@ -152,7 +152,7 @@
       <div class="bottom_info">
         <div class="row">
           <div class="col-md-6 text-left text-md-left text-center">
-            <p>Semester: 4</p>
+            <p>Semester: {{current_semester}}</p>
             <p>Gender: {{student.gender}}</p>
           </div>
           <div class="col-md-6 text-md-right text-center">
@@ -205,7 +205,7 @@
       {% for exam in exam_data %}
         <!-- semester no. display table -->
         <table class="main" border="black" width="100%" bgcolor="1D82C6">
-          <td align="center"><b>SEM {{exam.exam.semester}}</b></td>
+          <td align="center"><b>{{exam.exam.semester}}</b></td>
         </table>
         <br>
         
@@ -213,7 +213,7 @@
         <table border="black" width="100%">
           <tr>
             <td>{{exam.exam.exam_name}}</td>
-            <td align="right">CUR BKLG: {{exam.backlog}}</td>
+            <td align="right">Backlog : {{exam.backlog}}</td>
           </tr>
         </table>
 

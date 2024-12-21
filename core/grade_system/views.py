@@ -1,3 +1,4 @@
+from django.db.models import Max
 from django.shortcuts import render, get_object_or_404
 from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 
@@ -13,6 +14,12 @@ def student_grade_view(request, enrollment):
 
     # Get all the exams for the student
     student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
+
+    # Get the largest semester value
+    current_semester = student_exams.aggregate(Max('exam_data__semester'))['exam_data__semester__max']
+    current_semester = int(current_semester[-1])
+    if current_semester != 8:
+        current_semester += 1
 
     # Collect grade data and results for each exam
     exam_data = []
@@ -37,6 +44,7 @@ def student_grade_view(request, enrollment):
     context = {
         'student': student,
         'exam_data': exam_data,
+        'current_semester' : current_semester,
     }
 
     return render(request, 'index.html', context)
