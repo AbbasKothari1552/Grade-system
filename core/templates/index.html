@@ -205,7 +205,11 @@
       {% for exam in exam_data %}
         <!-- semester no. display table -->
         <table class="main" border="black" width="100%" bgcolor="1D82C6">
-          <td align="center"><b>{{exam.exam.semester}}</b></td>
+          {% if exam.exam.exam_type == "REPETER" %}
+            <td align="center"><b>{{exam.exam.semester}} (BACKLOG)</b></td>
+          {% else %}
+            <td align="center"><b>{{exam.exam.semester}}</b></td>
+          {% endif %}
         </table>
         <br>
         
