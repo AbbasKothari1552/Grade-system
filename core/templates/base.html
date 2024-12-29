@@ -1,70 +1,63 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
-    {% block extra_css %} {% endblock %}
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
-  <body>
-    <div class="container-fluid p-0 m-0">
-      <!-- Header -->
-      <div class="navigation fixed-top">
-        <img
-          src="{% static 'images/adit_logo.PNG' %}"
-          alt="ADIT Logo"
-          class="logo"
-        />
-        <div class="navtext">
-          <h5>A D PATEL INSTITUTE OF TECHNOLOGY</h5>
-          <p>Department of Computer Science & Design</p>
-        </div>
+  {% block extra_css %} {% endblock %}
+</head>
 
-        <img
-          src="{% static 'images/cvm_logo.PNG' %}"
-          alt="CVM University Logo"
-          class="logo"
-        />
+<body>
+  <div class="container-fluid p-0 m-0">
+    <!-- Header -->
+    <div class="navigation fixed-top">
+      <img src="{% static 'images/adit_logo.PNG' %}" alt="ADIT Logo" class="logo" />
+      <div class="navtext">
+        <h5>A D PATEL INSTITUTE OF TECHNOLOGY</h5>
+        <p>Department of Computer Science & Design</p>
       </div>
 
-      <!-- Sidebar -->
-      <div class="sidebar text-white">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'student' %}"
-              >Student Grade History</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'subject' %}"
-              >Subject-wise Analysis</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'semester' %}"
-              >Semester-wise Analysis</a
-            >
-          </li>
-        </ul>
-      </div>
-
-      <!-- Main Content -->
-      <div class="content">{% block content %} {% endblock %}</div>
+      <img src="{% static 'images/cvm_logo.PNG' %}" alt="CVM University Logo" class="logo" />
     </div>
-  </body>
+
+    <!-- Sidebar -->
+    <div class="sidebar text-white">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'student' %}">Student Grade History</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'subject' %}">Subject-wise Analysis</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'semester' %}">Semester-wise Analysis</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <!-- div for messages from backend -->
+      <div>
+        {% if messages %}
+        <div class="alert alert-danger">
+          {% for message in messages %}
+          <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% block content %} {% endblock %}
+    </div>
+  </div>
+</body>
+
 </html>

@@ -45,37 +45,107 @@
     {% for student in students_grade %}
     <tr>
       <td>{{student.student_exam.student_info.spid}}</td>
-      <td>{{student.student_exam.exam_data.exam_type}}</td>
+      <td>{{student.student_exam.student_info.enrollment}}</td>
       <td>{{student.student_exam.student_info.name}}</td>
       <td>{{student.grade}}</td>
     </tr>
     {% endfor %}
   </table>
   <br />
-  <p>Summary Table:</p>
+
+  <h4>Summary</h4>
   <table border="1">
     <tr>
-      <th>AA</th>
-      <th>AB</th>
-      <th>BB</th>
-      <th>BC</th>
-      <th>CC</th>
-      <th>CD</th>
-      <th>DD</th>
-      <th>FF</th>
+      {% for grade in grade_counts_data %}
+        <th>{{grade.grade}}</th>
+      {% endfor %}
     </tr>
     <tr>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
+      {% for grade in grade_counts_data %}
+        <td>{{grade.count}}</td>
+      {% endfor %}
     </tr>
   </table>
   <br />
-  <p>Graphical Representation:</p>
+
+  <h4>Grade Distribution</h4>
+  <canvas id="gradeChart"></canvas>
+
+
 </div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ grade_labels|json_script:"gradeLabels" }}
+{{ grade_counts|json_script:"gradeCounts" }}
+
+<script>
+  // Accessing the content inside the script tags and parsing it
+  const gradeLabels = JSON.parse(document.getElementById('gradeLabels').textContent);
+  const gradeCounts = JSON.parse(document.getElementById('gradeCounts').textContent);
+
+  console.log(gradeLabels);  // Example: ['AA', 'AB', 'BB', ...]
+  console.log(gradeCounts);  // Example: [10, 8, 5, ...]
+</script>
+
+
+<script>
+  // Configure the Chart.js bar chart
+  const ctx = document.getElementById('gradeChart').getContext('2d');
+  const gradeChart = new Chart(ctx, {
+      type: 'bar', // Bar chart type
+      data: {
+          labels: gradeLabels, // X-axis labels (grades)
+          datasets: [{
+              label: 'Number of Students', // Legend label
+              data: gradeCounts, // Y-axis data (counts)
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',  // Customize bar colors
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          responsive: true, // Makes the chart responsive
+          plugins: {
+              legend: {
+                  display: true, // Show the legend
+                  position: 'top'
+              }
+          },
+          scales: {
+              y: {
+                  beginAtZero: true, // Start Y-axis from zero
+                  title: {
+                      display: true,
+                      text: 'Number of Students' // Y-axis title
+                  }
+              },
+              x: {
+                  title: {
+                      display: true,
+                      text: 'Grades' // X-axis title
+                  }
+              }
+          }
+      }
+  });
+</script>
+
+
 {% endblock %}

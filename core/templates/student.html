@@ -17,14 +17,23 @@
 <script>
   function submitForm() {
     const enrollment = document.getElementById("enrollment").value;
+    
+    // Regular expression to check if the enrollment number is exactly 11 digits
+    const enrollmentPattern = /^\d{14}$/;
+
     if (enrollment) {
-      const form = document.getElementById("gradeForm");
-      form.action = `/grades/${enrollment}/`; // Set the URL dynamically
-      form.submit();
+      if (enrollmentPattern.test(enrollment)) {
+        const form = document.getElementById("gradeForm");
+        form.action = `/grades/${enrollment}/`; // Set the URL dynamically
+        form.submit();
+      } else {
+        alert("Please enter a valid 14-digit enrollment number.");
+      }
     } else {
       alert("Please enter your enrollment number.");
     }
   }
 </script>
+
 
 {% endblock %}

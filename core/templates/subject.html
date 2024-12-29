@@ -24,6 +24,11 @@
                 <option>{{year}}</option>
                 {% endfor %}
             </select>
+            <label for="exam_type">Exam Type:</label>
+            <select name="exam_type" id="exam_type" class="year">
+              <option>REGULAR</option>
+              <option>REPETER</option>
+            </select>
             <button type="button" onclick="submitForm()">Search</button>
         </div>
     </form>
@@ -34,10 +39,11 @@
     function submitForm() {
       const subject = document.getElementById("subject").value;
       const year = document.getElementById("year").value;
+      const type = document.getElementById("exam_type").value;
 
       if (subject && year) {
         const form = document.getElementById("subjectForm");
-        form.action = `/subject/${subject}/${year}`; // Set the URL dynamically
+        form.action = `/subject/${subject}/${year}/${type}`; // Set the URL dynamically
         form.submit();
       } else {
         alert("Please enter Subject & year");
