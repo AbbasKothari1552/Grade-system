@@ -2,11 +2,11 @@ from django.db.models import Max
 from django.shortcuts import render, get_object_or_404
 from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 
+# Base Page Student enrollement Entry.
+def student(request):
+    return render(request, 'student.html')
 
-def basePage(request):
-    return render(request, 'login.html')
-
-
+# Student grade history view.
 def student_grade_view(request, enrollment):
     
     # get student information
@@ -68,4 +68,93 @@ def student_grade_view(request, enrollment):
         'current_semester' : current_semester,
     }
 
-    return render(request, 'index.html', context)
+    return render(request, 'student_grade.html', context)
+
+
+# Subject wise search template render view.
+def subject(request):
+    branch = "BACHELOR OF TECHNOLOGY (COMPUTER SCIENCE AND DESIGN)"
+    subjects = BranchSubjectSemester.objects.filter(branch__branch_name=branch).values_list('subject__subject_name', flat=True)
+    # Get distinct academic_year values
+    academic_years = ExamData.objects.values_list('academic_year', flat=True).distinct()
+    context = {
+        'subjects' : subjects,
+        'academic_years' : academic_years,
+    }
+    return render(request, "subject.html", context)
+
+# Subject wise student Data Display.
+def subject_analysis_view(request, subject, year):
+    
+    branch = "BACHELOR OF TECHNOLOGY (COMPUTER SCIENCE AND DESIGN)"
+    students_grade = GradeData.objects.filter(
+                                            student_exam__student_info__branch__branch_name=branch,
+                                            student_exam__exam_data__academic_year=year,
+                                            subject_bss__subject__subject_name=subject,
+                                            ).select_related(
+                                            'student_exam__student_info__branch',
+                                            'student_exam__exam_data',
+                                            'subject_bss__subject',
+                                            )
+    context = {
+        'students_grade' : students_grade,
+    }
+    return render(request, 'subject_data.html', context)
+
+
+# Semester wise search template render view.
+def semester(request):
+    # Get distinct academic_year values
+    academic_years = ExamData.objects.values_list('academic_year', flat=True).distinct()
+    context = {
+        'academic_years' : academic_years,
+    }
+    return render(request, "semester.html", context)
+
+def semester_analysis_view(request, semester, year):
+    branch = "BACHELOR OF TECHNOLOGY (COMPUTER SCIENCE AND DESIGN)"
+    
+    # Concatenating to match the database value
+    semester = "SEMESTER " + semester
+
+    # Get all subjects for the given branch and semester
+    subjects = BranchSubjectSemester.objects.filter(
+        branch__branch_name=branch,
+        semester=semester
+    ).values_list('subject__subject_name', flat=True)
+
+    # Get all students and their grades for the given branch, semester, and academic year
+    students_grade = GradeData.objects.filter(
+        student_exam__student_info__branch__branch_name=branch,
+        student_exam__exam_data__academic_year=year,
+        student_exam__exam_data__semester=semester,
+    ).select_related('student_exam__student_info', 'subject_bss__subject')
+
+    # Organize data for the template
+    table_data = []
+    for student in students_grade:
+        # Check if the student is already in the table data
+        enrollment = student.student_exam.student_info.enrollment
+        name = student.student_exam.student_info.name
+        subject_name = student.subject_bss.subject.subject_name
+        grade = student.grade
+
+        # Find or create the row for the student
+        row = next((r for r in table_data if r['enrollment'] == enrollment), None)
+        if not row:
+            row = {
+                'enrollment': enrollment,
+                'name': name,
+                'grades': {sub: "-" for sub in subjects}  # Initialize with dashes for all subjects
+            }
+            table_data.append(row)
+        
+        # Add the grade for the specific subject
+        row['grades'][subject_name] = grade
+
+    context = {
+        'subjects': subjects,  # List of subjects
+        'table_data': table_data  # Student and grades data
+    }
+
+    return render(request, "semester_data.html", context)
