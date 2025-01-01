@@ -1,14 +1,25 @@
 {% extends 'base.html' %} {% load static %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/student.css' %}" />
 {% endblock %} {% block content %}
-<div class="content2">
-  <p class="enrollment_text">Enter the enrollment number of the student:</p>
+<div class="enroll">
+  <p class="enrollment_text">Enter the enrollment number of the student</p>
   <form id="gradeForm" method="get">
     {% csrf_token %}
     <div class="enrollment_div">
       <label for="enrollment">Enrollment Number:</label>
       <input type="text" name="enrollment" id="enrollment" />
-      <button type="button" onclick="submitForm()">Check Grades</button>
+      <button type="button" onclick="submitForm()">Search</button>
+    </div>
+  </form>
+</div>
+  <span class="or">OR</span>
+ <div class="name">
+  <p class="name_text">Enter the name of the student</p>
+  <form  method="get">
+    <div class="name_div">
+      <label for="enrollment">Name:</label>
+      <input type="text" name="enrollment" id="enrollment" />
+      <button type="button">Search</button>
     </div>
   </form>
 </div>

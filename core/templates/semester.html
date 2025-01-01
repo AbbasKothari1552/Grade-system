@@ -6,8 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="content2">
-    <p class="sem_text">Choose the branch and semester to view the result:</p>
+    <p class="sem_text">Select the branch and semester to view the result</p>
     <form id="semForm" method="get">
         {% csrf_token %}
         <div class="semdiv">
@@ -44,7 +43,6 @@
             <button type="button" onclick="submitForm()">Search</button>
         </div>
     </form>
-</div>
 
 <!-- script for adding semester & year in url -->
 <script>
