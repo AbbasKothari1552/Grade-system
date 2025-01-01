@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_details.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+  <div class="container">
+    
+    <br>
+    <form>
+    <div class="student_info">
+      <div class="top_info">
+        <div class="row">
+          <div class="col-md-6 text-left text-md-left text-center">
+            <p>Name: {{student.name}}</p>
+            <p>Enrollment No: {{student.enrollment}}</p>
+          </div>
+          <div class="col-md-6 text-md-right text-center">
+            <p>SPID: {{student.spid}}</p>
+            <p>Academic Year: 2022-2023</p>
+          </div>
+        </div>
+        <!-- Photo -->
+        <img src="{% static 'images/student_photo.jpg' %}"  alt="Student Photo" class="student-photo" />
+      </div>
+      <!-- Secondary Information -->
+      <div class="bottom_info">
+        <div class="row">
+          <div class="col-md-6 text-left text-md-left text-center">
+            <p>Semester: {{current_semester}}</p>
+            <p>Gender: {{student.gender}}</p>
+          </div>
+          <div class="col-md-6 text-md-right text-center">
+            <p>Program Name:</p>
+            <p>{{student.branch.branch_name}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <br />
+
+    <div>
+      <table border="black" class="table info">
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <table border="black" class="table info">
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <br />
+
+      {% for exam in exam_data %}
+
+        <!-- Semester no. & Type Display Table -->
+        <table  border="black" width="100%" style="color: white; background-color: #1D82C6;">
+          {% if exam.exam.exam_type == "REPETER" %}
+            <td align="center"><b>{{exam.exam.semester}} (BACKLOG)</b></td>
+          {% else %}
+            <td align="center"><b>{{exam.exam.semester}}</b></td>
+          {% endif %}
+        </table>
+        <br>
+
+        <!-- semester name & backlog display table -->
+        <table border="black" width="100%">
+          <tr>
+            <td>{{exam.exam.exam_name}}</td>
+            <td align="right">Backlog : {{exam.backlog}}</td>
+          </tr>
+        </table>
+
+        <!-- subjects Grade Display Table for each semester -->
+        <table border="black" width="100%">
+          <tr bgcolor="d9e5ed">
+            <th>SUB_CODE</th>
+            <th>SUBJECT NAME</th>
+            <th>GRADE</th>
+          </tr>
+          {% for grade in exam.grades %}
+          <tr>
+            <td>{{grade.subject_bss.subject.subject_code}}</td>
+            <td>{{grade.subject_bss.subject.subject_name}}</td>
+            <td>{{grade.grade}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <br>
+      
+      {% endfor %}
+
+    </div>
+  </form>
+  </div>
+
+  {% endblock %}
