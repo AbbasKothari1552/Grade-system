@@ -19,16 +19,22 @@ def student(request):
 # Student grade history view.
 # Student grade history view.
 def student_grade_view(request, enrollment):
+<<<<<<< HEAD
 
     try:
         # get student information
         student = get_object_or_404(StudentInfo, enrollment=enrollment)
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
     try:
         # get student information
         student = get_object_or_404(StudentInfo, enrollment=enrollment)
 
+<<<<<<< HEAD
         # Get all the exams for the student
         student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
         # Get all the exams for the student
         student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
 
@@ -41,7 +47,10 @@ def student_grade_view(request, enrollment):
         # Collect grade data and results for each exam
         exam_data = []
         for student_exam in student_exams:
+<<<<<<< HEAD
             # Check exam type
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
             if student_exam.exam_data.exam_type == "REPETER":
                 main_exam = StudentExam.objects.filter(
                     student_info=student_exam.student_info, 
@@ -50,6 +59,7 @@ def student_grade_view(request, enrollment):
                 
                 if main_exam:
                     failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
+<<<<<<< HEAD
                     # Get the backlog subjects for the repeater exam
                     grades = GradeData.objects.filter(
                         student_exam=student_exam,
@@ -77,6 +87,8 @@ def student_grade_view(request, enrollment):
                 
                 if main_exam:
                     failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
 
                     # Get the backlog subjects for the repeater exam
                     grades = GradeData.objects.filter(
@@ -89,8 +101,11 @@ def student_grade_view(request, enrollment):
                 # Get grade data for each subject in this exam
                 grades = GradeData.objects.filter(student_exam=student_exam)
 
+<<<<<<< HEAD
             # Get the result for this exam
             result = Result.objects.filter(student_exam=student_exam).first()
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
             # Get the result for this exam
             result = Result.objects.filter(student_exam=student_exam).first()
 
@@ -103,6 +118,10 @@ def student_grade_view(request, enrollment):
                 'backlog': result.backlog if result else None,
                 'result': result.result if result else None,
             })
+<<<<<<< HEAD
+=======
+
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
 
         # Backlog summary for 8 semester.
         backlog_summary = []
@@ -115,11 +134,16 @@ def student_grade_view(request, enrollment):
                 'semester': semester,
                 'backlog': semester_data['backlog'] if semester_data else '-'  # Show backlog count or dash
             })
+<<<<<<< HEAD
+=======
+
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
         
         # Pass all the collected data to the template
         context = {
             'student': student,
             'exam_data': exam_data,
+<<<<<<< HEAD
             'backlog_summary': backlog_summary, 
             'current_semester': current_semester,
         }
@@ -151,6 +175,8 @@ def student_grade_view(request, enrollment):
         context = {
             'student': student,
             'exam_data': exam_data,
+=======
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
             'backlog_summary': backlog_summary, 
             'current_semester': current_semester,
         }
@@ -268,7 +294,11 @@ def semester_analysis_view(request, semester, year, type):
         'exam': students_grade[0].student_exam.exam_data.exam_name if students_grade.exists() else None,
         'declaration_date': students_grade[0].student_exam.exam_data.declaration_date if students_grade.exists() else None,
         'exam_type': type,
+<<<<<<< HEAD
     }
+=======
+
+>>>>>>> 687f6d90d8c693fe2b4d201c2a69885de19ae46c
 
     return render(request, "semester_data.html", context)
         return render(request, 'student_data.html', context)
