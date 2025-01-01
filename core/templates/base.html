@@ -12,10 +12,6 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
   {% block extra_css %} {% endblock %}
 </head>
 
@@ -33,11 +29,7 @@
     </div>
 
     <!-- Sidebar -->
-<<<<<<< HEAD
     <div class="sidebar text-white position-fixed">
-=======
-    <div class="sidebar text-white">
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
       <ul class="nav flex-column">
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'student' %}">Student Grade History</a>
@@ -54,10 +46,6 @@
     <!-- Main Content -->
     <div class="content">
       <!-- div for messages from backend -->
-<<<<<<< HEAD
-=======
-      <div>
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
         {% if messages %}
         <div class="alert alert-danger">
           {% for message in messages %}
@@ -65,22 +53,15 @@
           {% endfor %}
         </div>
         {% endif %}
-<<<<<<< HEAD
-=======
-      </div>
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
       {% block content %} {% endblock %}
     </div>
   </div>
 </body>
-<<<<<<< HEAD
 <script>
   document.getElementById('printButton').addEventListener('click', function () {
       // Trigger the print dialog
       window.print();
   });
 </script>
-=======
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
 
 </html>

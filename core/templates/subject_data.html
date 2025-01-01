@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="{% static 'css/student_details.css' %}">
 {% endblock %} {% block content %}
 
-<<<<<<< HEAD
 
 <div class="container">
   <!-- Check for Data -->
@@ -40,40 +39,6 @@
   <br>
 
   <!-- Student wise subject grades Display. -->
-=======
-<div class="student_info">
-  <div class="top_info">
-    <div class="row">
-      <div class="col-md-6 text-left text-md-left text-center">
-        <p>SUBJECT CODE: {{students_grade.0.subject_bss.subject.subject_code}}</p>
-        <p>SUBJECT NAME: {{students_grade.0.subject_bss.subject.subject_name}}</p>
-      </div>
-      <div class="col-md-6 text-md-right text-center">
-        <p>SEMESTER: {{students_grade.0.subject_bss.semester}}</p>
-        <p>Academic Year: {{students_grade.0.student_exam.exam_data.academic_year}}</p>
-      </div>
-    </div>
-  </div>
-  <!-- Secondary Information -->
-  <div class="bottom_info">
-    <div class="row">
-      <div class="col-md-6 text-left text-md-left text-center">
-        <p>Exam : {{students_grade.0.student_exam.exam_data.exam_name}}</p>
-        <p>Declaration Date : {{students_grade.0.student_exam.exam_data.declaration_date}}</p>
-      </div>
-      <div class="col-md-6 text-md-right text-center">
-        <p>Program Name:</p>
-        <p></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-<div class="container">
->>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
   <table border="1">
     <tr>
       <th>SPID</th>
