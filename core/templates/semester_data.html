@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %} {% load static %} 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/semesterdata.css' %}" />
@@ -39,6 +40,13 @@
   </div>
   <br>
 
+=======
+{% extends 'base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/semesterdata.css' %}" />
+{% endblock %} {% block content %}
+<div class="container">
+
+>>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
   <table border="1">
     <tr>
       <th>Enrollment No:</th>
@@ -57,9 +65,12 @@
     </tr>
     {% endfor %}
   </table>
+<<<<<<< HEAD
 
   {% else %}
   <h3>No Data Found for selected Parameters</h3>
   {% endif %}
+=======
+>>>>>>> 192c5fa7b3a5e8b0231e858e27af1fd8639a231b
 </div>
 {% endblock %}
