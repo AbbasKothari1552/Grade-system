@@ -1,91 +1,169 @@
 import pandas as pd
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from openpyxl import load_workbook
-from grade_system.models import StudentInfo, Branch
+from django.db import transaction
+from django.db.utils import IntegrityError
+from django.shortcuts import render, redirect
+from datetime import datetime
+from grade_system.models import StudentInfo, ExamData, StudentExam, BranchSubjectSemester, Subject, GradeData, Result, Branch
 
 
-def data_upload_page(request):
-    return render(request, 'upload_student_data.html')
-
-
-def upload_student_data(request):
+def load_file(file):
     """
-    ->This view take excel file as input for new student data entry in database.
-    ->The function checks for the required column in file.
-    ->The function checks for the duplicate or already exists entry &
-      also missing values.
+    Load an uploaded Excel or CSV file into a Pandas DataFrame.
+
+    Parameters:
+        file (InMemoryUploadedFile): The uploaded file object (from Django request.FILES).
+
+    Returns:
+        pd.DataFrame: Pandas DataFrame containing the file data.
+
+    Raises:
+        ValueError: If the file format is unsupported or an error occurs while reading.
     """
-    errors = []  # To store all error messages
-    if request.method == 'POST':
-        uploaded_file = request.FILES.get('file')
-        if not uploaded_file:
-            errors.append("No file uploaded.")
-            return render(request, 'upload_student_data.html', {'errors': errors})
+    try:
+        # Check the content type or file name for file format
+        if file.name.endswith('.xlsx'):
+            # For modern Excel files (.xlsx), use openpyxl
+            df = pd.read_excel(file, engine='openpyxl')
+        elif file.name.endswith('.xls'):
+            # For older Excel files (.xls), use xlrd
+            df = pd.read_excel(file, engine='xlrd')
+        elif file.name.endswith('.csv'):
+            # For CSV files, use pandas.read_csv
+            df = pd.read_csv(file)
+        else:
+            raise ValueError("Unsupported file format. Please upload .xlsx, .xls, or .csv files.")
+        
+        print("File loaded successfully.")
+        return df
 
-        try:
-            # Read the Excel file
-            df = pd.read_excel(uploaded_file)
-            print(df.columns)
+    except Exception as e:
+        raise ValueError(f"Error processing file: {e}")
 
-            # Define required columns
-            required_columns = [
-                'spid', 'enrollment', 'name', 'gender', 
-                'date_of_birth', 'faculty_name', 
-                'college_code', 'college_name', 'branch'
-            ]
 
-            # Check for missing columns
-            for col in required_columns:
-                if col not in df.columns:
-                    errors.append(f"Missing required column: {col}")
 
-            # If required columns are missing, stop processing
-            if errors:
-                return render(request, 'upload_student_data.html', {'errors': errors})
+def process_excel_file(file):
 
-            # Validate rows for missing values and conflicts
-            for index, row in df.iterrows():
-                missing_fields = [col for col in required_columns if pd.isnull(row[col])]
-                if missing_fields:
-                    errors.append(f"Row {index + 1}: Missing values in columns {missing_fields}")
+    try:
+        # Step 1: Parse Excel file
+        data = load_file(file)
 
-                # Check for duplicate SPID and Enrollment in database
-                if not pd.isnull(row['spid']) and StudentInfo.objects.filter(spid=row['spid']).exists():
-                    errors.append(f"Row {index + 1}: SPID '{row['spid']}' already exists.")
+        with transaction.atomic():
+            for _, row in data.iterrows():
+                # Extract Student Info
+                spid = row['SPDID']
+                enrollment = row['EnrolmentNumber']
+                name = row['StudentName']
+                gender = row['GenderName']
+                dob = row['BirthDate']
+                faculty_name = row['FacultyName']
+                college_code = row['CollegeCode']
+                college_name = row['CollegeName']
+                program_code = row['ProgramCode']
+                program_name = row['ProgrammeName']
+                semester = row['ProgramTermName']
+                exam_name = row['ExamName']
+                exam_month = row['ExamMonth']
+                exam_year = row['ExamYear']
+                exam_type = row['ExamType']
+                declaration_date = row['DeclarationDate']
+                academic_year = row['AcadamicYear']
+                seat_no = row['ExamSeatNo']
+                sgpa = row['SGPA']
+                cgpa = row['CGPA']
+                backlog = row['CurrentSemBacklog']
+                result_status = row['RESULT']
+                ufm = row['UFM']
 
-                if not pd.isnull(row['enrollment']) and StudentInfo.objects.filter(enrollment=row['enrollment']).exists():
-                    errors.append(f"Row {index + 1}: Enrollment '{row['enrollment']}' already exists.")
-
-                # Check if branch exists in the database
-                if not pd.isnull(row['branch']) and not Branch.objects.filter(branch_name=row['branch']).exists():
-                    errors.append(f"Row {index + 1}: Branch '{row['branch']}' does not exist in the database.")
-
-            # If errors are found, stop processing
-            if errors:
-                return render(request, 'upload_student_data.html', {'errors': errors})
-
-            # If no errors, create entries in the database
-            for index, row in df.iterrows():
-                branch_instance = Branch.objects.get(branch_name=row['branch'])  # Fetch branch instance
-                StudentInfo.objects.create(
-                    spid=row['spid'],
-                    enrollment=row['enrollment'],
-                    name=row['name'],
-                    gender=row['gender'],
-                    date_of_birth=row['date_of_birth'],
-                    faculty_name=row['faculty_name'],
-                    college_code=row['college_code'],
-                    college_name=row['college_name'],
-                    branch=branch_instance
+                # Step 2: Add or Get StudentInfo
+                student, created_student = StudentInfo.objects.get_or_create(
+                    spid=spid,
+                    defaults={
+                        'enrollment': enrollment,
+                        'name': name,
+                        'gender': gender,
+                        'date_of_birth': dob,
+                        'faculty_name': faculty_name,
+                        'college_code': college_code,
+                        'college_name': college_name,
+                        'branch': Branch.objects.get(branch_code=program_code),
+                    }
                 )
 
-            return JsonResponse({'message': 'All entries successfully added to the database.'})
+                # Step 3: Add or Get ExamData
+                exam, created_exam = ExamData.objects.get_or_create(
+                    exam_name=exam_name,
+                    exam_month=exam_month,
+                    exam_year=exam_year,
+                    exam_type=exam_type,
+                    semester=semester,
+                    declaration_date=declaration_date, # **on hold for now, ask sir**
+                    academic_year=academic_year
+                )
 
-        except Exception as e:
-            print(e)
-            errors.append(f"Error processing the file: {str(e)}")
+                # Step 4: Add or Get StudentExam
+                student_exam, created_student_exam = StudentExam.objects.get_or_create(
+                    student_info=student,
+                    exam_data=exam,
+                    defaults={'seat_no': seat_no}
+                )
+
+                # Step 5: Validate Subjects and Add Grades
+                for i in range(1, 12):  # Loop through all subjects (SUB1 to SUB11)
+                    paper_code = row.get(f'SUB{i}PaperCode')
+                    subject_name = row.get(f'SUB{i}Name')
+                    credits = row.get(f'SUB{i}Credits')
+                    grade = row.get(f'SUB{i}OverallGrade1')
+
+                    if pd.isna(paper_code) or pd.isna(subject_name):
+                        # Skip if the subject is not provided
+                        continue
+
+                    # Check if the subject exists in the BranchSubjectSemester model
+                    subject = Subject.objects.filter(subject_code=paper_code).first()
+                    if not subject:
+                        raise IntegrityError(f"Subject with code {paper_code} is missing from the database.")
+
+                    branch_subject = BranchSubjectSemester.objects.filter(
+                        subject=subject,
+                        branch_id=student.branch_id,
+                        semester=semester
+                    ).first()
+
+                    if not branch_subject:
+                        raise IntegrityError(f"Subject {paper_code} ({subject_name}) is not configured for branch {program_code} and semester {semester}.")
+
+                    # Add GradeData
+                    GradeData.objects.get_or_create(
+                        student_exam=student_exam,
+                        subject_bss=branch_subject,
+                        defaults={'grade': grade}
+                    )
+
+                # Step 6: Add Result
+                Result.objects.get_or_create(
+                    student_exam=student_exam,
+                    defaults={
+                        'sgpa': sgpa,
+                        'cgpa': cgpa,
+                        'backlog': backlog,
+                        'ufm': True if str(ufm).strip().lower() == "yes" else False,
+                        'result': result_status
+                    }
+                )
+
+        print("All data successfully processed and saved.")
+
+    except IntegrityError as e:
+        print(f"Transaction failed: {e}")
+    except Exception as e:
+        print(f"Error processing file: {e}")
+
+
+def upload_data(request):
+
+    if request.method == 'POST':
+        file = request.FILES.get('file')
+        process_excel_file(file)
+        return redirect("upload_data")
     
-    return render(request, 'upload_student_data.html', {'errors': errors})
-
+    return render(request, "upload_data.html")

@@ -26,17 +26,16 @@ class Subject(models.Model):
 #ExamData Model
 class ExamData(models.Model):
     types=[
-        ("Regular","Regular"),
-        ("Repeater","Repeater"),
-      
-             ]
+        ("REGULAR","REGULAR"),
+        ("REPETER","REPETER"),
+        ]
     id = models.AutoField(primary_key=True)
     exam_name = models.CharField(max_length=100)
     exam_month = models.CharField(max_length=10)
     exam_year = models.IntegerField()
     exam_type = models.CharField(max_length=8,choices=types)
-    semester = models.IntegerField()
-    declaration_date = models.DateField()
+    semester = models.CharField(max_length=12) # Changed from integer to char according to excel sheet.
+    declaration_date = models.CharField(max_length=20, null=True, blank=True)
     academic_year = models.CharField(max_length=9)
 
     def __str__(self):
@@ -51,7 +50,7 @@ class BranchSubjectSemester(models.Model):
     id = models.AutoField(primary_key=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    semester = models.IntegerField()
+    semester = models.CharField(max_length=12) # Changed from integer to char according to excel sheet.
     is_core = models.BooleanField()
     elective_group = models.CharField(max_length=50, blank=True, null=True,choices=type)
 
@@ -106,9 +105,9 @@ class GradeData(models.Model):
 
 # Result Model
 class Result(models.Model):
-    result_choice=[
-        ("Pass","Pass"),
-        ("Fail","Fail"),
+    result_choice=[ # option changed as per sheet format 
+        ("PASS","PASS"),
+        ("FAIL","FAIL"),
     ]
     id = models.AutoField(primary_key=True)
     student_exam = models.ForeignKey(StudentExam, on_delete=models.CASCADE)

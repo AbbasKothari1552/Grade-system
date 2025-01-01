@@ -1,0 +1,60 @@
+/*style for semester.html*/
+.content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 65px);
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #005384;
+    color: white;
+    width: 100px;
+    height: 35px;
+    border-radius: 5px;
+    box-shadow: none;
+    border: none;
+}
+
+.semester {
+    height: 35px;
+    width: 50px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 4px;
+
+}
+
+.year {
+    height: 35px;
+    width: 100px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 4px;
+
+}
+
+.branch {
+    height: 35px;
+    width: 350px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 4px;
+}
+
+.semdiv {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sem_text {
+    font-size: 18px;
+    color: black;
+    margin-bottom: 30px;
+}
