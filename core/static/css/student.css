@@ -1,0 +1,42 @@
+/* style for student.html */
+.content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 65px);
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.search {
+    background-color: #005384;
+    color: white;
+    width: 100px;
+    height: 35px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+input {
+    height: 35px;
+    width: 350px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 10px;
+
+}
+
+.enrollment_div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.enrollment_text {
+    font-size: 18px;
+    color: black;
+    margin-bottom: 35px;
+
+}

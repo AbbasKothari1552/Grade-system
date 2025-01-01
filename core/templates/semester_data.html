@@ -1,0 +1,65 @@
+{% extends 'base.html' %} {% load static %} 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/semesterdata.css' %}" />
+<link rel="stylesheet" href="{% static 'css/student_details.css' %}">
+{% endblock %} 
+
+{% block content %}
+
+<div class="container">
+
+  <!-- Check for Data -->
+  {% if table_data %}
+  
+  <!-- Semester Info  -->
+  <div class="student_info">
+    <div class="top_info">
+      <div class="row">
+        <div class="col-md-6 text-left text-md-left text-center">
+          <p><b>Semester:</b> {{semester}}</p>
+          <p><b>Academic Year:</b> {{academic_year}}</p>
+        </div>
+        <div class="col-md-6 text-md-right text-center">
+        </div>
+      </div>
+    </div>
+    <!-- Secondary Information -->
+    <div class="bottom_info">
+      <div class="row">
+        <div class="col-md-6 text-left text-md-left text-center">
+          <p><b>Exam:</b> {{exam}}</p>
+          <p><b>Declaration Date:</b> {{declaration_date}}</p>
+        </div>
+        <div class="col-md-6 text-md-right text-center">
+          <p><b>Exam Type:</b> {{exam_type}}</p>
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+
+  <table border="1">
+    <tr>
+      <th>Enrollment No:</th>
+      <th>Name</th>
+      {% for subject in subjects %}
+      <th>{{subject}}</th>
+      {% endfor %}
+    </tr>
+    {% for row in table_data %}
+    <tr>
+      <td>{{ row.enrollment }}</td>
+      <td>{{ row.name }}</td>
+      {% for subject, grade in row.grades.items %}
+        <td>{{ grade|default:"subject" }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% else %}
+  <h3>No Data Found for selected Parameters</h3>
+  {% endif %}
+</div>
+{% endblock %}

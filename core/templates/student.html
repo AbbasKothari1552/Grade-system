@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student.css' %}" />
+{% endblock %} {% block content %}
+<div class="content2">
+  <p class="enrollment_text">Enter the enrollment number of the student:</p>
+  <form id="gradeForm" method="get">
+    {% csrf_token %}
+    <div class="enrollment_div">
+      <label for="enrollment">Enrollment Number:</label>
+      <input type="text" name="enrollment" id="enrollment" />
+      <button type="button" class="search" onclick="submitForm()">Search</button>
+    </div>
+  </form>
+</div>
+
+<!-- script for adding enrollment in url -->
+<script>
+  function submitForm() {
+    const enrollment = document.getElementById("enrollment").value;
+    
+    // Regular expression to check if the enrollment number is exactly 11 digits
+    const enrollmentPattern = /^\d{14}$/;
+
+    if (enrollment) {
+      if (enrollmentPattern.test(enrollment)) {
+        const form = document.getElementById("gradeForm");
+        form.action = `/grades/${enrollment}/`; // Set the URL dynamically
+        form.submit();
+      } else {
+        alert("Please enter a valid 14-digit enrollment number.");
+      }
+    } else {
+      alert("Please enter enrollment number.");
+    }
+  }
+</script>
+
+
+{% endblock %}
