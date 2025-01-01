@@ -3,38 +3,41 @@
 <link rel="stylesheet" href="{% static 'css/student_details.css' %}">
 {% endblock %} {% block content %}
 
-<div class="student_info">
-  <div class="top_info">
-    <div class="row">
-      <div class="col-md-6 text-left text-md-left text-center">
-        <p>SUBJECT CODE: {{students_grade.0.subject_bss.subject.subject_code}}</p>
-        <p>SUBJECT NAME: {{students_grade.0.subject_bss.subject.subject_name}}</p>
-      </div>
-      <div class="col-md-6 text-md-right text-center">
-        <p>SEMESTER: {{students_grade.0.subject_bss.semester}}</p>
-        <p>Academic Year: {{students_grade.0.student_exam.exam_data.academic_year}}</p>
-      </div>
-    </div>
-  </div>
-  <!-- Secondary Information -->
-  <div class="bottom_info">
-    <div class="row">
-      <div class="col-md-6 text-left text-md-left text-center">
-        <p>Exam : {{students_grade.0.student_exam.exam_data.exam_name}}</p>
-        <p>Declaration Date : {{students_grade.0.student_exam.exam_data.declaration_date}}</p>
-      </div>
-      <div class="col-md-6 text-md-right text-center">
-        <p>Program Name:</p>
-        <p></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
 <div class="container">
+  <!-- Check for Data -->
+  {% if students_grade.exists %}
+  <!-- Subject Information -->
+  <div class="student_info">
+    <div class="top_info">
+      <div class="row">
+        <div class="col-md-6 text-left text-md-left text-center">
+          <p><b>Subject Code:</b> {{students_grade.0.subject_bss.subject.subject_code}}</p>
+          <p><b>Subject Name:</b> {{students_grade.0.subject_bss.subject.subject_name}}</p>
+          <p><b>Subject Credits:</b> {{students_grade.0.subject_bss.subject.credits}}</p>
+        </div>
+        <div class="col-md-6 text-md-right text-center">
+          <p><b>Semester:</b> {{students_grade.0.subject_bss.semester}}</p>
+          <p><b>Academic Year:</b> {{students_grade.0.student_exam.exam_data.academic_year}}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Secondary Information -->
+    <div class="bottom_info">
+      <div class="row">
+        <div class="col-md-6 text-left text-md-left text-center">
+          <p><b>Exam:</b> {{students_grade.0.student_exam.exam_data.exam_name}}</p>
+          <p><b>Declaration Date:</b> {{students_grade.0.student_exam.exam_data.declaration_date}}</p>
+        </div>
+        <div class="col-md-6 text-md-right text-center">
+          <p><b>Exam Type:</b> {{students_grade.0.student_exam.exam_data.exam_type}}</p>
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+
+  <!-- Student wise subject grades Display. -->
   <table border="1">
     <tr>
       <th>SPID</th>
@@ -70,8 +73,9 @@
 
   <h4>Grade Distribution</h4>
   <canvas id="gradeChart"></canvas>
-
-
+  {% else %}
+  <h3>No Data Found for selected Parameters</h3>
+  {% endif %}
 </div>
 
 

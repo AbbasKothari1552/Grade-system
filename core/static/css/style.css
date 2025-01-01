@@ -48,7 +48,7 @@
     top: 55px;
     width: 16.6667%;
     padding: 15px;
-}
+    z-index:2;
 
 .sidebar .nav-link {
     color: white;

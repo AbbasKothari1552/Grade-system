@@ -29,7 +29,7 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="sidebar text-white">
+    <div class="sidebar text-white position-fixed">
       <ul class="nav flex-column">
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'student' %}">Student Grade History</a>
@@ -46,7 +46,6 @@
     <!-- Main Content -->
     <div class="content">
       <!-- div for messages from backend -->
-      <div>
         {% if messages %}
         <div class="alert alert-danger">
           {% for message in messages %}
@@ -54,10 +53,14 @@
           {% endfor %}
         </div>
         {% endif %}
-      </div>
       {% block content %} {% endblock %}
     </div>
   </div>
 </body>
-
+<script>
+  document.getElementById('printButton').addEventListener('click', function () {
+      // Trigger the print dialog
+      window.print();
+  });
+</script>
 </html>
