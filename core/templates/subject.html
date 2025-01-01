@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subject.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content2">
+    <p class="sub_text">Select the subject to view the entire result:
+    </p>
+    <form id="subjectForm" method="get">
+        {% csrf_token %}
+        <div class="subdiv">
+            <label for="subject">Subject:</label>
+            <select name="subject" id="subject" class="subject">
+                {% for subject in subjects %}
+                <option>{{subject}}</option>
+                {% endfor %}
+            </select>
+            <label for="year">Year:</label>
+            <select name="year" id="year" class="year">
+                {% for year in academic_years %}
+                <option>{{year}}</option>
+                {% endfor %}
+            </select>
+            <label for="exam_type">Exam Type:</label>
+            <select name="exam_type" id="exam_type" class="year">
+              <option>REGULAR</option>
+              <option>REPETER</option>
+            </select>
+            <button type="button" onclick="submitForm()">Search</button>
+        </div>
+    </form>
+</div>
+
+<!-- script for adding subject & year in url -->
+<script>
+    function submitForm() {
+      const subject = document.getElementById("subject").value;
+      const year = document.getElementById("year").value;
+      const type = document.getElementById("exam_type").value;
+
+      if (subject && year) {
+        const form = document.getElementById("subjectForm");
+        form.action = `/subject/${subject}/${year}/${type}`; // Set the URL dynamically
+        form.submit();
+      } else {
+        alert("Please enter Subject & year");
+      }
+    }
+</script>
+
+{% endblock %}

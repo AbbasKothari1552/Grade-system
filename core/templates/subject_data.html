@@ -1,0 +1,151 @@
+{% extends 'base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subjectdata.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/student_details.css' %}">
+{% endblock %} {% block content %}
+
+<div class="student_info">
+  <div class="top_info">
+    <div class="row">
+      <div class="col-md-6 text-left text-md-left text-center">
+        <p>SUBJECT CODE: {{students_grade.0.subject_bss.subject.subject_code}}</p>
+        <p>SUBJECT NAME: {{students_grade.0.subject_bss.subject.subject_name}}</p>
+      </div>
+      <div class="col-md-6 text-md-right text-center">
+        <p>SEMESTER: {{students_grade.0.subject_bss.semester}}</p>
+        <p>Academic Year: {{students_grade.0.student_exam.exam_data.academic_year}}</p>
+      </div>
+    </div>
+  </div>
+  <!-- Secondary Information -->
+  <div class="bottom_info">
+    <div class="row">
+      <div class="col-md-6 text-left text-md-left text-center">
+        <p>Exam : {{students_grade.0.student_exam.exam_data.exam_name}}</p>
+        <p>Declaration Date : {{students_grade.0.student_exam.exam_data.declaration_date}}</p>
+      </div>
+      <div class="col-md-6 text-md-right text-center">
+        <p>Program Name:</p>
+        <p></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="container">
+  <table border="1">
+    <tr>
+      <th>SPID</th>
+      <th>Enrollment No</th>
+      <th>Name</th>
+      <th>Grade</th>
+    </tr>
+    {% for student in students_grade %}
+    <tr>
+      <td>{{student.student_exam.student_info.spid}}</td>
+      <td>{{student.student_exam.student_info.enrollment}}</td>
+      <td>{{student.student_exam.student_info.name}}</td>
+      <td>{{student.grade}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br />
+
+  <h4>Summary</h4>
+  <table border="1">
+    <tr>
+      {% for grade in grade_counts_data %}
+        <th>{{grade.grade}}</th>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for grade in grade_counts_data %}
+        <td>{{grade.count}}</td>
+      {% endfor %}
+    </tr>
+  </table>
+  <br />
+
+  <h4>Grade Distribution</h4>
+  <canvas id="gradeChart"></canvas>
+
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ grade_labels|json_script:"gradeLabels" }}
+{{ grade_counts|json_script:"gradeCounts" }}
+
+<script>
+  // Accessing the content inside the script tags and parsing it
+  const gradeLabels = JSON.parse(document.getElementById('gradeLabels').textContent);
+  const gradeCounts = JSON.parse(document.getElementById('gradeCounts').textContent);
+
+  console.log(gradeLabels);  // Example: ['AA', 'AB', 'BB', ...]
+  console.log(gradeCounts);  // Example: [10, 8, 5, ...]
+</script>
+
+
+<script>
+  // Configure the Chart.js bar chart
+  const ctx = document.getElementById('gradeChart').getContext('2d');
+  const gradeChart = new Chart(ctx, {
+      type: 'bar', // Bar chart type
+      data: {
+          labels: gradeLabels, // X-axis labels (grades)
+          datasets: [{
+              label: 'Number of Students', // Legend label
+              data: gradeCounts, // Y-axis data (counts)
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',  // Customize bar colors
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          responsive: true, // Makes the chart responsive
+          plugins: {
+              legend: {
+                  display: true, // Show the legend
+                  position: 'top'
+              }
+          },
+          scales: {
+              y: {
+                  beginAtZero: true, // Start Y-axis from zero
+                  title: {
+                      display: true,
+                      text: 'Number of Students' // Y-axis title
+                  }
+              },
+              x: {
+                  title: {
+                      display: true,
+                      text: 'Grades' // X-axis title
+                  }
+              }
+          }
+      }
+  });
+</script>
+
+
+{% endblock %}

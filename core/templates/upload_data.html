@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Upload Student Data</h1>
-    <form method="POST" enctype="multipart/form-data", action="{% url 'upload_student_data' %}">
+    <form method="POST" enctype="multipart/form-data", action="{% url 'upload_data' %}">
         {% csrf_token %}
         <label for="file">Upload Excel File:</label>
         <input type="file" name="file" accept=".xlsx, .xls" required>

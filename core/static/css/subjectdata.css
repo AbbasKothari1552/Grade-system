@@ -1,0 +1,55 @@
+/*style for subjectdata.html*/
+.content {
+    margin-top: 74px;
+}
+
+button {
+    background-color: #005384;
+    color: white;
+    width: 100px;
+    height: 35px;
+    border-radius: 5px;
+    box-shadow: none;
+    border: none;
+}
+
+.subject {
+    height: 35px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 4px;
+
+}
+
+.year {
+    height: 35px;
+    border-radius: 5px;
+    border: 1px solid #B7B7B7;
+    margin-right: 10px;
+    padding: 4px;
+
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    background-color: #e6edf3;
+}
+
+th, td {
+    padding: 5px 10px;
+    text-align: left;
+}
+
+
+
+.subinfo {
+    font-size: 16.5px;
+    font-weight: 500;
+    color: #005384;
+    margin-bottom: 0px;
+
+}
