@@ -1,22 +1,31 @@
 from django.db.models import Max, Count
+from django.db.models import Max, Count
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.http import Http404
+from django.contrib import messages
+from django.http import Http404
 from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
+import json
 import json
 
 # Base Page Student enrollement Entry.
 def student(request):
     return render(request, 'student.html')
+# Base Page Student enrollement Entry.
+def student(request):
+    return render(request, 'student.html')
 
+# Student grade history view.
 # Student grade history view.
 def student_grade_view(request, enrollment):
 
     try:
-    
         # get student information
         student = get_object_or_404(StudentInfo, enrollment=enrollment)
 
+        # Get all the exams for the student
+        student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
         # Get all the exams for the student
         student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
 
@@ -29,7 +38,7 @@ def student_grade_view(request, enrollment):
         # Collect grade data and results for each exam
         exam_data = []
         for student_exam in student_exams:
-
+            # Check exam type
             if student_exam.exam_data.exam_type == "REPETER":
                 main_exam = StudentExam.objects.filter(
                     student_info=student_exam.student_info, 
@@ -38,7 +47,6 @@ def student_grade_view(request, enrollment):
                 
                 if main_exam:
                     failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
-
                     # Get the backlog subjects for the repeater exam
                     grades = GradeData.objects.filter(
                         student_exam=student_exam,
@@ -49,9 +57,6 @@ def student_grade_view(request, enrollment):
             else:
                 # Get grade data for each subject in this exam
                 grades = GradeData.objects.filter(student_exam=student_exam)
-
-            # # Filter grades to include only subjects where grade is 'FF'
-            # failed_grades = grades.filter(grade='FF')
 
             # Get the result for this exam
             result = Result.objects.filter(student_exam=student_exam).first()
@@ -65,15 +70,28 @@ def student_grade_view(request, enrollment):
                 'backlog': result.backlog if result else None,
                 'result': result.result if result else None,
             })
+
+        # Backlog summary for 8 semester.
+        backlog_summary = []
+        for semester in range(1,9):
+            semester_data = next(
+            (data for data in exam_data if data['exam'].semester == f"SEMESTER {semester}" and data['exam'].exam_type == "REGULAR"),
+            None
+            )
+            backlog_summary.append({
+                'semester': semester,
+                'backlog': semester_data['backlog'] if semester_data else '-'  # Show backlog count or dash
+            })
         
         # Pass all the collected data to the template
         context = {
             'student': student,
             'exam_data': exam_data,
-            'current_semester' : current_semester,
+            'backlog_summary': backlog_summary, 
+            'current_semester': current_semester,
         }
 
-        return render(request, 'student_grade.html', context)
+        return render(request, 'student_data.html', context)
     except Http404:
         # If student is not found, display a message
         messages.error(request, "Incorrect enrollment number. Please try again.")
@@ -105,8 +123,7 @@ def subject_analysis_view(request, subject, year, type):
                                             'student_exam__student_info__branch',
                                             'student_exam__exam_data',
                                             'subject_bss__subject',
-                                            )
-    
+                                            ).order_by('student_exam__student_info__enrollment')
     # Grade counting
     grade_counts_data = students_grade.values("grade").annotate(count=Count("grade")).order_by("grade")
     # Convert queryset to JSON-compatible format
@@ -152,7 +169,10 @@ def semester_analysis_view(request, semester, year, type):
         student_exam__exam_data__academic_year=year,
         student_exam__exam_data__semester=semester,
         student_exam__exam_data__exam_type=type,
-    ).select_related('student_exam__student_info', 'student_exam__exam_data')
+    ).select_related(
+        'student_exam__student_info',
+        'student_exam__exam_data'
+        ).order_by('student_exam__student_info__enrollment')
 
     # Organize data for the template
     table_data = []
@@ -178,7 +198,12 @@ def semester_analysis_view(request, semester, year, type):
 
     context = {
         'subjects': subjects,  # List of subjects
-        'table_data': table_data  # Student and grades data
+        'table_data': table_data,  # Student and grades data
+        'semester': semester,
+        'academic_year': year,
+        'exam': students_grade[0].student_exam.exam_data.exam_name if students_grade.exists() else None,
+        'declaration_date': students_grade[0].student_exam.exam_data.declaration_date if students_grade.exists() else None,
+        'exam_type': type,
     }
 
     return render(request, "semester_data.html", context)
