@@ -10,7 +10,7 @@
 
     background-color: #e6edf3;
     text-align: center;
-    height: 70px;
+    height: 65px;
     font-weight: 600;
     font-size: 18px;
     display: flex;
@@ -20,7 +20,7 @@
 }
 
 .navigation .navtext {
-    margin-top: 20px;
+    margin-top: 17px;
     border: 0px;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .logo {
-    height: 70px;
+    height: 65px;
     mix-blend-mode: multiply;
 }
 
@@ -48,8 +48,9 @@
     top: 55px;
     width: 16.6667%;
     padding: 15px;
-    z-index: 3;
+    z-index:2;
 }
+
 
 .sidebar .nav-link {
     color: white;

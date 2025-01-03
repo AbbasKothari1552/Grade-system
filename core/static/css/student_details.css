@@ -74,37 +74,3 @@ input {
   margin-right: 10px;
   padding: 10px;
 }
-
-#printButton{
-  background-color: #005384;
-}
-
-@media print {
-  body * {
-      visibility: hidden;
-  }
-  #printableContent, #printableContent * {
-    visibility: visible;
-}
-  #printableContent {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    font-size: 15px;
-}
-  button{
-      display: none;
-  }
-  .col-md-6 {
-    float: left; /* Ensure it aligns left */
-    width: 50%; /* Adjust column width */
-  }
-  .text-left {
-    text-align: left !important; /* Override default print alignment */
-  }
-  .text-md-right{
-    text-align: right !important;
-  }
-  
-}
