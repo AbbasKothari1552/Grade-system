@@ -3,7 +3,9 @@
 <link rel="stylesheet" href="{% static 'css/student_details.css' %}">
 {% endblock %} {% block content %}
 
+
 <div class="container">
+  {% if students_grade_exists %}
   <div class="student_info">
     <div class="top_info">
       <div class="row">
@@ -68,7 +70,7 @@
 
   <h5 >Grade Distribution</h5>
   <canvas id="gradeChart"></canvas>
-  
+    
   {% else %}
   <h3>No Data Found for selected Parameters</h3>
   {% endif %}

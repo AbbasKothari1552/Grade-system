@@ -1,8 +1,7 @@
-from django.db.models import Max, Count
-from django.db.models import Max, Count
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Max, Count
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.contrib import messages
 from django.http import Http404
 from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
@@ -12,91 +11,116 @@ import json
 # Base Page Student enrollement Entry.
 def student(request):
     return render(request, 'student.html')
-# Base Page Student enrollement Entry.
-def student(request):
-    return render(request, 'student.html')
 
-# Student grade history view.
-# Student grade history view.
-def student_grade_view(request, enrollment):
+# Name suggestion of student 
+def student_name_suggestions(request):
+    """
+    This view handles the Suggestion of names on the 
+    student.html page while user search for student's
+    grade history by Name.
+    """
+    if 'query' in request.GET:
+        query = request.GET['query']
+        # Filter students whose name contains the query (case-insensitive)
+        students = StudentInfo.objects.filter(name__icontains=query).values_list('name', flat=True)
+        return JsonResponse({'suggestions': list(students)}, safe=False)
+    return JsonResponse({'suggestions': []})
 
-    try:
-        # get student information
-        student = get_object_or_404(StudentInfo, enrollment=enrollment)
+# Student grade history view
+def student_grade_view(request):
 
-        # Get all the exams for the student
-        student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
-        # Get all the exams for the student
-        student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
+    if request.method == "GET":
+        try:
+            enrollment = request.GET.get('enrollment')
+            name = request.GET.get('name')
 
-        # Get the largest semester value
-        current_semester = student_exams.aggregate(Max('exam_data__semester'))['exam_data__semester__max']
-        current_semester = int(current_semester[-1])
-        if current_semester != 8:
-            current_semester += 1
+            print(name)
 
-        # Collect grade data and results for each exam
-        exam_data = []
-        for student_exam in student_exams:
-            # Check exam type
-            if student_exam.exam_data.exam_type == "REPETER":
-                main_exam = StudentExam.objects.filter(
-                    student_info=student_exam.student_info, 
-                    exam_data__semester=student_exam.exam_data.semester, 
-                    exam_data__exam_type="REGULAR").first()
-                
-                if main_exam:
-                    failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
-                    # Get the backlog subjects for the repeater exam
-                    grades = GradeData.objects.filter(
-                        student_exam=student_exam,
-                        subject_bss__in=failed_subjects.values_list('subject_bss', flat=True)  # Match only failed subjects
-                    )
-                else:
-                    print("Main exam not found.")
+            if enrollment:
+                # Search by enrollment number
+                student = get_object_or_404(StudentInfo, enrollment=enrollment)
+            elif name:
+                # Search by name
+                student = get_object_or_404(StudentInfo, name__icontains=name)
             else:
-                # Get grade data for each subject in this exam
-                grades = GradeData.objects.filter(student_exam=student_exam)
+                # No search criteria provided
+                messages.error(request, "Please provide either an enrollment number or a name to search.")
+                return render(request, 'student.html')
 
-            # Get the result for this exam
-            result = Result.objects.filter(student_exam=student_exam).first()
+            # Get all the exams for the student
+            student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
 
-            # Collect semester-wise data
-            exam_data.append({
-                'exam': student_exam.exam_data,
-                'grades': grades,
-                'sgpa': result.sgpa if result else None,
-                'cgpa': result.cgpa if result else None,
-                'backlog': result.backlog if result else None,
-                'result': result.result if result else None,
-            })
+            # Get the largest semester value
+            current_semester = student_exams.aggregate(Max('exam_data__semester'))['exam_data__semester__max']
+            if current_semester:
+                current_semester = int(current_semester[-1])
+                if current_semester != 8:
+                    current_semester += 1
+            else:
+                current_semester = 1
 
-        # Backlog summary for 8 semester.
-        backlog_summary = []
-        for semester in range(1,9):
-            semester_data = next(
-            (data for data in exam_data if data['exam'].semester == f"SEMESTER {semester}" and data['exam'].exam_type == "REGULAR"),
-            None
-            )
-            backlog_summary.append({
-                'semester': semester,
-                'backlog': semester_data['backlog'] if semester_data else '-'  # Show backlog count or dash
-            })
-        
-        # Pass all the collected data to the template
-        context = {
-            'student': student,
-            'exam_data': exam_data,
-            'backlog_summary': backlog_summary, 
-            'current_semester': current_semester,
-        }
+            # Collect grade data and results for each exam
+            exam_data = []
+            for student_exam in student_exams:
+                if student_exam.exam_data.exam_type == "REPETER":
+                    main_exam = StudentExam.objects.filter(
+                        student_info=student_exam.student_info,
+                        exam_data__semester=student_exam.exam_data.semester,
+                        exam_data__exam_type="REGULAR"
+                    ).first()
 
-        return render(request, 'student_data.html', context)
-    except Http404:
-        # If student is not found, display a message
-        messages.error(request, "Incorrect enrollment number. Please try again.")
+                    if main_exam:
+                        failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
+                        grades = GradeData.objects.filter(
+                            student_exam=student_exam,
+                            subject_bss__in=failed_subjects.values_list('subject_bss', flat=True)
+                        )
+                    else:
+                        grades = []
+                else:
+                    grades = GradeData.objects.filter(student_exam=student_exam)
+
+                result = Result.objects.filter(student_exam=student_exam).first()
+
+                exam_data.append({
+                    'exam': student_exam.exam_data,
+                    'grades': grades,
+                    'sgpa': result.sgpa if result else None,
+                    'cgpa': result.cgpa if result else None,
+                    'backlog': result.backlog if result else None,
+                    'result': result.result if result else None,
+                })
+
+            # Backlog summary for 8 semesters
+            backlog_summary = []
+            for semester in range(1, 9):
+                semester_data = next(
+                    (data for data in exam_data if data['exam'].semester == f"SEMESTER {semester}" and data['exam'].exam_type == "REGULAR"),
+                    None
+                )
+                backlog_summary.append({
+                    'semester': semester,
+                    'backlog': semester_data['backlog'] if semester_data else '-'
+                })
+
+            context = {
+                'student': student,
+                'exam_data': exam_data,
+                'backlog_summary': backlog_summary,
+                'current_semester': current_semester,
+            }
+
+            return render(request, 'student_data.html', context)
+
+        except Http404:
+            messages.error(request, "Student not found. Please check the details and try again.")
+            return render(request, 'student.html')
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, 'student.html')
+    else:
         return render(request, 'student.html')
-
 
 # Subject wise search template render view.
 def subject(request):
@@ -135,6 +159,7 @@ def subject_analysis_view(request, subject, year, type):
 
     context = {
         'students_grade' : students_grade,
+        'students_grade_exists': students_grade.exists(),
         'grade_counts_data' : grade_counts_data,
         'grade_labels' : grade_labels,
         'grade_counts' : grade_counts
