@@ -10,9 +10,7 @@
 {% block content %}
 
   <div class="container">
-    
-    <br>
-    <form>
+   <div id="printableContent">
     <div class="student_info">
       <div class="top_info">
         <div class="row">
@@ -121,7 +119,10 @@
       {% endfor %}
 
     </div>
-  </form>
+     </div>
+
+    <button type="submit" id="printButton" >Print</button>
+
   </div>
 
   {% endblock %}
