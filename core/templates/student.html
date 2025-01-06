@@ -1,38 +1,59 @@
 {% extends 'base.html' %} {% load static %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/student.css' %}" />
 {% endblock %} {% block content %}
-<div class="content2">
-  <p class="enrollment_text">Enter the enrollment number of the student:</p>
-  <form id="gradeForm" method="get">
+<div class="enroll">
+  <p class="enrollment_text">Enter the enrollment number of the student</p>
+  <form method="get", action="{% url 'student_data' %}">
     {% csrf_token %}
     <div class="enrollment_div">
       <label for="enrollment">Enrollment Number:</label>
       <input type="text" name="enrollment" id="enrollment" />
-      <button type="button" class="search" onclick="submitForm()">Search</button>
+      <button type="submit">Search</button>
+    </div>
+  </form>
+</div>
+  <span class="or">OR</span>
+ <div class="name">
+  <p class="name_text">Enter the name of the student</p>
+  <form  method="get", action="{% url 'student_data' %}">
+    <div class="name_div">
+      <label for="enrollment">Name:</label>
+      <input type="text" name="name" id="name-search" placeholder="Search by name">
+      <div id="suggestions-box"></div>
+      <button type="submit">Search</button>
     </div>
   </form>
 </div>
 
-<!-- script for adding enrollment in url -->
+<!-- script for giving name suggestion of students. -->
 <script>
-  function submitForm() {
-    const enrollment = document.getElementById("enrollment").value;
-    
-    // Regular expression to check if the enrollment number is exactly 11 digits
-    const enrollmentPattern = /^\d{14}$/;
+  const input = document.getElementById('name-search');
+  const suggestionsBox = document.getElementById('suggestions-box');
 
-    if (enrollment) {
-      if (enrollmentPattern.test(enrollment)) {
-        const form = document.getElementById("gradeForm");
-        form.action = `/grades/${enrollment}/`; // Set the URL dynamically
-        form.submit();
+  input.addEventListener('input', function () {
+      const query = this.value;
+
+      if (query.length > 0) {
+          fetch(`/name-suggestions/?query=${query}`)
+              .then(response => response.json())
+              .then(data => {
+                  suggestionsBox.innerHTML = '';
+                  if (data.suggestions && data.suggestions.length > 0) {
+                      data.suggestions.forEach(name => {
+                          const suggestion = document.createElement('div');
+                          suggestion.textContent = name;
+                          suggestion.addEventListener('click', () => {
+                              input.value = name;
+                              suggestionsBox.innerHTML = ''; // Clear suggestions
+                          });
+                          suggestionsBox.appendChild(suggestion);
+                      });
+                  }
+              });
       } else {
-        alert("Please enter a valid 14-digit enrollment number.");
+          suggestionsBox.innerHTML = ''; // Clear suggestions
       }
-    } else {
-      alert("Please enter enrollment number.");
-    }
-  }
+  });
 </script>
 
 

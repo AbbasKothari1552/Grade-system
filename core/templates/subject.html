@@ -6,8 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="content2">
-    <p class="sub_text">Select the subject to view the entire result:
+    <p class="sub_text">Select the subject to view the entire result
     </p>
     <form id="subjectForm" method="get">
         {% csrf_token %}
@@ -32,7 +31,6 @@
             <button type="button" onclick="submitForm()">Search</button>
         </div>
     </form>
-</div>
 
 <!-- script for adding subject & year in url -->
 <script>

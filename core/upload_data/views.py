@@ -138,7 +138,7 @@ def process_excel_file(file):
                         subject_bss=branch_subject,
                         defaults={'grade': grade}
                     )
-
+    
                 # Step 6: Add Result
                 Result.objects.get_or_create(
                     student_exam=student_exam,
@@ -161,9 +161,28 @@ def process_excel_file(file):
 
 def upload_data(request):
 
+    user = False
+    if request.user.is_superuser:
+        user = True
+
     if request.method == 'POST':
         file = request.FILES.get('file')
         process_excel_file(file)
         return redirect("upload_data")
     
-    return render(request, "upload_data.html")
+    context = {
+        'user': user
+    }
+    return render(request, "upload_data.html", context)
+
+
+def data_upload(request):
+
+    user = False
+    if request.user.is_superuser:
+        user = True
+    
+    context = {
+        'user': user
+    }
+    return render(request, 'data_upload.html', context)
