@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+{% if user %}
+<div style="margin-bottom: 20px;">
+    <h2>Hello, admin</h2>
+</div>
+{% else %}
+<h2>Not permited</h2>
+{% endif %}
+
+
+{{ block.super }}
+{% endblock %}

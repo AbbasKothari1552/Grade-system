@@ -176,19 +176,26 @@ def semester(request):
     }
     return render(request, "semester.html", context)
 
+
+# Semester wise analysis view.
 def semester_analysis_view(request, semester, year, type):
     branch = "BACHELOR OF TECHNOLOGY (COMPUTER SCIENCE AND DESIGN)"
     
-    # Concatenating to match the database value
+    # Concatenate to match the database value
     semester = "SEMESTER " + semester
 
     # Get all subjects for the given branch and semester
-    subjects = BranchSubjectSemester.objects.filter(
+    all_subjects = BranchSubjectSemester.objects.filter(
         branch__branch_name=branch,
         semester=semester
-    ).values_list('subject__subject_name', flat=True)
+    ).select_related('subject')
 
-    # Get all students and their grades for the given branch, semester, and academic year
+    # Categorize subjects into core and elective subjects
+    core_subjects = all_subjects.filter(is_core=True)
+    professional_electives = all_subjects.filter(elective_group="PROFESSIONAL")
+    open_electives = all_subjects.filter(elective_group="OPEN")
+
+    # Get all grades for students in the given semester, academic year, and exam type
     students_grade = GradeData.objects.filter(
         student_exam__student_info__branch__branch_name=branch,
         student_exam__exam_data__academic_year=year,
@@ -196,39 +203,79 @@ def semester_analysis_view(request, semester, year, type):
         student_exam__exam_data__exam_type=type,
     ).select_related(
         'student_exam__student_info',
-        'student_exam__exam_data'
-        ).order_by('student_exam__student_info__enrollment')
+        'student_exam__exam_data',
+        'subject_bss__subject'
+    ).order_by('student_exam__student_info__enrollment')
 
-    # Organize data for the template
-    table_data = []
-    for student in students_grade:
-        # Check if the student is already in the table data
-        enrollment = student.student_exam.student_info.enrollment
-        name = student.student_exam.student_info.name
-        subject_name = student.subject_bss.subject.subject_name
-        grade = student.grade
-
-        # Find or create the row for the student
-        row = next((r for r in table_data if r['enrollment'] == enrollment), None)
-        if not row:
-            row = {
-                'enrollment': enrollment,
-                'name': name,
-                'grades': {sub: "-" for sub in subjects}  # Initialize with dashes for all subjects
+    # Map student grades for faster access
+    student_grades = {}
+    for grade in students_grade:
+        enrollment = grade.student_exam.student_info.enrollment
+        subject_id = grade.subject_bss.subject.id
+        if enrollment not in student_grades:
+            student_grades[enrollment] = {
+                'name': grade.student_exam.student_info.name,
+                'grades': {},
+                'electives': {'professional': [], 'open': []}
             }
-            table_data.append(row)
-        
-        # Add the grade for the specific subject
-        row['grades'][subject_name] = grade
+        if grade.subject_bss.is_core:
+            student_grades[enrollment]['grades'][subject_id] = grade.grade
+        elif grade.subject_bss.elective_group == "PROFESSIONAL":
+            student_grades[enrollment]['electives']['professional'].append({
+                'subject_name': grade.subject_bss.subject.subject_name,
+                'grade': grade.grade
+            })
+        elif grade.subject_bss.elective_group == "OPEN":
+            student_grades[enrollment]['electives']['open'].append({
+                'subject_name': grade.subject_bss.subject.subject_name,
+                'grade': grade.grade
+            })
 
+    # Create table_data for core subjects (Table 1)
+    core_subject_order = [subject.subject.id for subject in core_subjects]
+    core_headers = ["Enrollment", "Name"] + [subject.subject.subject_name for subject in core_subjects]
+    core_table_data = []
+
+    for enrollment, data in student_grades.items():
+        row = [enrollment, data['name']]  # Enrollment and name
+        for subject_id in core_subject_order:
+            grade = data['grades'].get(subject_id, "-")  # Get grade or "-"
+            row.append(grade)
+        core_table_data.append(row)
+
+    # Create table_data for elective subjects (Table 2)
+    elective_table_data = []
+    for enrollment, data in student_grades.items():
+        if data['electives']['professional'] or data['electives']['open']:
+            for i in range(max(len(data['electives']['professional']), len(data['electives']['open']))):
+                professional = data['electives']['professional'][i] if i < len(data['electives']['professional']) else {'subject_name': "-", 'grade': "-"}
+                open_elective = data['electives']['open'][i] if i < len(data['electives']['open']) else {'subject_name': "-", 'grade': "-"}
+                elective_table_data.append([
+                    professional['subject_name'], professional['grade'],
+                    open_elective['subject_name'], open_elective['grade']
+                ])
+    
+    combined_data = []
+    if elective_table_data:
+        for core_row, elective_row in zip(core_table_data, elective_table_data):
+            combined_data.append({
+                'core': core_row,  # A list containing enrollment, name, and core grades
+                'elective': elective_row  # A list containing professional and open electives
+            })
+    
+
+    # Pass data to the template
     context = {
-        'subjects': subjects,  # List of subjects
-        'table_data': table_data,  # Student and grades data
+        'core_headers': core_headers,
+        'core_table_data': core_table_data,
+        'combined_data': combined_data,
+        # 'elective_table_data': elective_table_data,
         'semester': semester,
         'academic_year': year,
         'exam': students_grade[0].student_exam.exam_data.exam_name if students_grade.exists() else None,
         'declaration_date': students_grade[0].student_exam.exam_data.declaration_date if students_grade.exists() else None,
         'exam_type': type,
     }
+
 
     return render(request, "semester_data.html", context)

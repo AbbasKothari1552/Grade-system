@@ -44,8 +44,8 @@ class ExamData(models.Model):
 # Branch-Subject-Semester Model
 class BranchSubjectSemester(models.Model):
     type=[
-        ("Professional","Professional"),
-        ("Elective","Elective"),
+        ("PROFESSIONAL","PROFESSIONAL"),
+        ("OPEN","OPEN"),
     ]
     id = models.AutoField(primary_key=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)

@@ -9,7 +9,7 @@
 <div class="container">
 
   <!-- Check for Data -->
-  {% if table_data %}
+  {% if core_table_data %}
   
   <!-- Semester Info  -->
   <div class="student_info">
@@ -40,23 +40,48 @@
   <br>
 
   <table border="1">
-    <tr>
-      <th>Enrollment No:</th>
-      <th>Name</th>
-      {% for subject in subjects %}
-      <th>{{subject}}</th>
-      {% endfor %}
-    </tr>
-    {% for row in table_data %}
-    <tr>
-      <td>{{ row.enrollment }}</td>
-      <td>{{ row.name }}</td>
-      {% for subject, grade in row.grades.items %}
-        <td>{{ grade|default:"subject" }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </table>
+    <thead>
+        <tr>
+            {% for header in core_headers %}
+            <th>{{header}}</th>
+            {% endfor %}
+            
+            <!-- for Professional & Open Elective grades -->
+            {% if combined_data %}
+            <th>Professional Subjects</th>
+            <th>Grade</th>
+            <th>Open Subjects</th>
+            <th>Grade</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% if combined_data %}
+        {% for row in combined_data %}
+          <tr>
+            <!-- Core Subjects Row -->
+            {% for cell in row.core %}
+            <td>{{cell}}</td>
+            {% endfor %}
+            <!-- Elective Subjects Row -->
+            {% for cell in row.elective %}
+            <td>{{cell}}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        {% else %}
+        {% for row in core_table_data %}
+        <tr>
+          <!-- Core Subjects Row -->
+          {% for cell in row %}
+          <td>{{cell}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
 
   {% else %}
   <h3>No Data Found for selected Parameters</h3>
