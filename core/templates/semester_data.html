@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="container">
+<div class="container-fluid">
 
   <!-- Check for Data -->
   {% if core_table_data %}
@@ -38,7 +38,7 @@
     </div>
   </div>
   <br>
-
+<div class="table_container">
   <table border="1">
     <thead>
         <tr>
@@ -82,7 +82,7 @@
     </tbody>
 </table>
 
-
+</div>
   {% else %}
   <h3>No Data Found for selected Parameters</h3>
   {% endif %}

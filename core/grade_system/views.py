@@ -3,9 +3,7 @@ from django.db.models import Max, Count
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.contrib import messages
-from django.http import Http404
-from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
-import json
+from .models import ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 import json
 
 # Base Page Student enrollement Entry.
