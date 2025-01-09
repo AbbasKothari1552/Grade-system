@@ -44,14 +44,21 @@ th, td {
   padding: 5px 10px;
 }
 
+    /* Table*/
+    .info {
+      background-color: #e0e0cc;
+      border: 1px solid #d1d1c1;
+    }
 
-.info {
-  background-color: #e0e0cc;
-  border: 1px solid #d1d1c1;
+    .info tr:nth-child(2) td {
+      background-color: #f7f7e6;
+    }
+
+.info th{
+  font-weight: 600;
 }
-
-.info tr:nth-child(2) td {
-  background-color: #f7f7e6;
+.info td, .info th{
+  padding: 5px 10px;
 }
 
 button {
@@ -76,7 +83,9 @@ input {
 }
 
 #printButton{
-  background-color: #005384;
+  background-color:  #1D82C6;
+  font-weight: 500;
+  font-size: 17px;
 }
 
 @media print {
@@ -91,7 +100,7 @@ input {
     left: 0;
     top: 0;
     width: 100%;
-    font-size: 15px;
+    font-size: 10pt;
 }
   button{
       display: none;
@@ -106,5 +115,5 @@ input {
   .text-md-right{
     text-align: right !important;
   }
-  
+ 
 }

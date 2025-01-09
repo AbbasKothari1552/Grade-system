@@ -36,7 +36,22 @@ button {
     padding: 4px;
 
 }
-
+.table-container {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  table {
+    width: 100%;
+  }
+  th {
+    position: sticky;
+    top: 70px; /* Sticks to the top of the viewport when scrolling */
+    z-index: 2; /* Ensures header stays above table content */
+    text-align: center; /* Optional: center-align text */
+    
+    padding: 8px; /* Optional: padding for readability */
+  }
 .branch {
     height: 35px;
     width: 350px;
