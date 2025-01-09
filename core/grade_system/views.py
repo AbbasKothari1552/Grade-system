@@ -1,28 +1,15 @@
-<<<<<<< HEAD
-=======
-from django.db.models import Max, Count
-from django.db.models import Max, Count
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Max, Count
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.contrib import messages
-from django.http import Http404
-from django.contrib import messages
-from django.http import Http404
-from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
-import json
+from .models import ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 import json
 
 # Base Page Student enrollement Entry.
 def student(request):
     return render(request, 'student.html')
-# Base Page Student enrollement Entry.
-def student(request):
-    return render(request, 'student.html')
 
-<<<<<<< HEAD
 # Name suggestion of student 
 def student_name_suggestions(request):
     """
@@ -44,57 +31,20 @@ def student_grade_view(request):
         try:
             enrollment = request.GET.get('enrollment')
             name = request.GET.get('name')
-=======
-# Student grade history view.
-# Student grade history view.
-def student_grade_view(request, enrollment):
-
-    try:
-        # get student information
-        student = get_object_or_404(StudentInfo, enrollment=enrollment)
-
-        # Get all the exams for the student
-        student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
-        # Get all the exams for the student
-        student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
 
             print(name)
 
-<<<<<<< HEAD
             if enrollment:
                 # Search by enrollment number
                 student = get_object_or_404(StudentInfo, enrollment=enrollment)
             elif name:
                 # Search by name
                 student = get_object_or_404(StudentInfo, name__icontains=name)
-=======
-        # Collect grade data and results for each exam
-        exam_data = []
-        for student_exam in student_exams:
-            # Check exam type
-            if student_exam.exam_data.exam_type == "REPETER":
-                main_exam = StudentExam.objects.filter(
-                    student_info=student_exam.student_info, 
-                    exam_data__semester=student_exam.exam_data.semester, 
-                    exam_data__exam_type="REGULAR").first()
-                
-                if main_exam:
-                    failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
-                    # Get the backlog subjects for the repeater exam
-                    grades = GradeData.objects.filter(
-                        student_exam=student_exam,
-                        subject_bss__in=failed_subjects.values_list('subject_bss', flat=True)  # Match only failed subjects
-                    )
-                else:
-                    print("Main exam not found.")
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
             else:
                 # No search criteria provided
                 messages.error(request, "Please provide either an enrollment number or a name to search.")
                 return render(request, 'student.html')
 
-<<<<<<< HEAD
             # Get all the exams for the student
             student_exams = StudentExam.objects.filter(student_info=student).order_by('exam_data__semester')
 
@@ -150,6 +100,8 @@ def student_grade_view(request, enrollment):
                     'semester': semester,
                     'backlog': semester_data['backlog'] if semester_data else '-'
                 })
+            
+            
 
             context = {
                 'student': student,
@@ -168,45 +120,6 @@ def student_grade_view(request, enrollment):
             messages.error(request, f"An error occurred: {str(e)}")
             return render(request, 'student.html')
     else:
-=======
-            # Get the result for this exam
-            result = Result.objects.filter(student_exam=student_exam).first()
-
-            # Collect semester-wise data
-            exam_data.append({
-                'exam': student_exam.exam_data,
-                'grades': grades,
-                'sgpa': result.sgpa if result else None,
-                'cgpa': result.cgpa if result else None,
-                'backlog': result.backlog if result else None,
-                'result': result.result if result else None,
-            })
-
-        # Backlog summary for 8 semester.
-        backlog_summary = []
-        for semester in range(1,9):
-            semester_data = next(
-            (data for data in exam_data if data['exam'].semester == f"SEMESTER {semester}" and data['exam'].exam_type == "REGULAR"),
-            None
-            )
-            backlog_summary.append({
-                'semester': semester,
-                'backlog': semester_data['backlog'] if semester_data else '-'  # Show backlog count or dash
-            })
-        
-        # Pass all the collected data to the template
-        context = {
-            'student': student,
-            'exam_data': exam_data,
-            'backlog_summary': backlog_summary, 
-            'current_semester': current_semester,
-        }
-
-        return render(request, 'student_data.html', context)
-    except Http404:
-        # If student is not found, display a message
-        messages.error(request, "Incorrect enrollment number. Please try again.")
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
         return render(request, 'student.html')
 
 # Subject wise search template render view.
@@ -290,14 +203,9 @@ def semester_analysis_view(request, semester, year, type):
         student_exam__exam_data__exam_type=type,
     ).select_related(
         'student_exam__student_info',
-<<<<<<< HEAD
         'student_exam__exam_data',
         'subject_bss__subject'
     ).order_by('student_exam__student_info__enrollment')
-=======
-        'student_exam__exam_data'
-        ).order_by('student_exam__student_info__enrollment')
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
 
     # Map student grades for faster access
     student_grades = {}
@@ -358,15 +266,10 @@ def semester_analysis_view(request, semester, year, type):
 
     # Pass data to the template
     context = {
-<<<<<<< HEAD
         'core_headers': core_headers,
         'core_table_data': core_table_data,
         'combined_data': combined_data,
         # 'elective_table_data': elective_table_data,
-=======
-        'subjects': subjects,  # List of subjects
-        'table_data': table_data,  # Student and grades data
->>>>>>> 85bc40b751fc80ec053d8a30f944f1914edbcb2b
         'semester': semester,
         'academic_year': year,
         'exam': students_grade[0].student_exam.exam_data.exam_name if students_grade.exists() else None,
