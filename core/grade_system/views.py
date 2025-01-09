@@ -100,8 +100,6 @@ def student_grade_view(request):
                     'semester': semester,
                     'backlog': semester_data['backlog'] if semester_data else '-'
                 })
-            
-            
 
             context = {
                 'student': student,
