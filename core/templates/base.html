@@ -40,6 +40,11 @@
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'semester' %}">Semester-wise Analysis</a>
         </li>
+        {% if user.is_superuser %}
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'upload_data' %}">Upload Data</a>
+        </li>
+        {% endif %}
       </ul>
     </div>
 

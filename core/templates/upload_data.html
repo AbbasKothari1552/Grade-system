@@ -1,18 +1,24 @@
 <!-- templates/upload_file.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Student Data</title>
-</head>
-<body>
-    {% if user %}
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="container">
+    {% if user.is_superuser %}
     <h1>Upload Student Data</h1>
     <form method="POST" enctype="multipart/form-data", action="{% url 'upload_data' %}">
         {% csrf_token %}
         <label for="file">Upload Excel File:</label>
         <input type="file" name="file" accept=".xlsx, .xls" required>
+        <button type="submit">Upload</button> <br>
+       
+    </form><br>
+    
+    <form action="{% url 'upload_images'%}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label for="images">Upload Images Folder:</label>
+        <input type="file" name="images" id="images" multiple required>
         <button type="submit">Upload</button>
     </form>
     {% else %}
@@ -27,5 +33,5 @@
             {% endfor %}
         </ul>
     {% endif %}
-</body>
-</html>
+    </div>
+{% endblock %}

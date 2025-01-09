@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.http import Http404
 from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 import json
-import json
 
 # Base Page Student enrollement Entry.
 def student(request):

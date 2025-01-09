@@ -76,6 +76,7 @@ class StudentInfo(models.Model):
     college_code = models.IntegerField()
     college_name = models.CharField(max_length=100)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None)
 
     def __str__(self):
         return self.name

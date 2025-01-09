@@ -2,7 +2,7 @@ import pandas as pd
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.shortcuts import render, redirect
-from datetime import datetime
+from django.contrib import messages
 from grade_system.models import StudentInfo, ExamData, StudentExam, BranchSubjectSemester, Subject, GradeData, Result, Branch
 
 
@@ -123,21 +123,22 @@ def process_excel_file(file):
                     if not subject:
                         raise IntegrityError(f"Subject with code {paper_code} is missing from the database.")
 
-                    branch_subject = BranchSubjectSemester.objects.filter(
+                    branch_subject = BranchSubjectSemester.objects.get(
                         subject=subject,
-                        branch_id=student.branch_id,
+                        branch=student.branch,
                         semester=semester
-                    ).first()
+                    )
 
                     if not branch_subject:
                         raise IntegrityError(f"Subject {paper_code} ({subject_name}) is not configured for branch {program_code} and semester {semester}.")
 
                     # Add GradeData
-                    GradeData.objects.get_or_create(
+                    gd=GradeData.objects.create(
                         student_exam=student_exam,
                         subject_bss=branch_subject,
-                        defaults={'grade': grade}
+                        grade=grade,
                     )
+                    print(gd)
     
                 # Step 6: Add Result
                 Result.objects.get_or_create(
@@ -161,28 +162,47 @@ def process_excel_file(file):
 
 def upload_data(request):
 
-    user = False
-    if request.user.is_superuser:
-        user = True
+   
 
     if request.method == 'POST':
         file = request.FILES.get('file')
         process_excel_file(file)
         return redirect("upload_data")
-    
-    context = {
-        'user': user
-    }
-    return render(request, "upload_data.html", context)
+    return render(request, "upload_data.html")
 
 
-def data_upload(request):
 
-    user = False
-    if request.user.is_superuser:
-        user = True
-    
-    context = {
-        'user': user
-    }
-    return render(request, 'data_upload.html', context)
+def upload_images(request):
+    if request.method == "POST":
+        images = request.FILES.getlist('images')  # Get all uploaded files
+        errors = []
+        students = []
+        
+        # Step 1: Validate all images
+        for image in images:
+            image_name = (image.name).split(".")
+            try:
+                enrollment_number = int(image_name[0])  # Extract enrollment number
+                student = StudentInfo.objects.get(enrollment=enrollment_number)
+                students.append((student, image))  # Store valid students and images in a list
+            except (ValueError, IndexError):
+                errors.append(f"Invalid file name format: {image.name}")
+            except StudentInfo.DoesNotExist:
+                errors.append(f"No student found with enrollment number: {image_name[0]}")
+
+        # Step 2: If there are errors, redirect with error messages
+        if errors:
+            for error in errors:
+                messages.error(request, error)  # Add each error message to Django messages
+            return redirect('upload_data')  # Replace 'upload_template' with the name of your template
+
+        # Step 3: Save all valid images
+        for student, image in students:
+            student.image.save(image.name, image)  # Save each image to the respective student's image field
+        
+        messages.success(request, "All images were successfully uploaded.")
+        return redirect('upload_data')  # Redirect to the same or another template after successful upload
+
+    messages.error(request, "Invalid request method.")
+    return redirect('upload_data')  # Redirect for non-POST requests
+
