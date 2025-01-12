@@ -6,7 +6,7 @@
   <form method="get", action="{% url 'student_data' %}">
     {% csrf_token %}
     <div class="enrollment_div">
-      <label for="enrollment">Enrollment Number:</label>
+      <label for="enrollment">Enrollment No.:</label>
       <input type="text" name="enrollment" id="enrollment"   placeholder="e.g. 12102130501011 (14-digit number)"/>
       <button type="submit" class="search">Search</button>
     </div>
@@ -17,7 +17,7 @@
   <p class="name_text">Enter the name of the student</p>
   <form  method="get", action="{% url 'student_data' %}">
     <div class="name_div">
-        <label for="enrollment">Name:</label>
+        <label for="enrollment">Student Name:</label>
         <input type="text" name="name" id="name-search" placeholder="Enter your name as on your marksheet">
         <div id="suggestions-box"></div>
      
@@ -61,7 +61,6 @@
         suggestionsBox.style.display = 'none'; // Hide suggestions box if query is empty
     }
 });
-
 </script>
 
 

@@ -24,8 +24,12 @@
             <p><b>Academic Year:</b> 2022-2023</p>
           </div>
         </div>
+        {% if student.image %}
         <!-- Photo -->
+        <img src="{{student.image.url}}" alt="Student Photo" class="student-photo" />
+        {% else %}
         <img src="{% static 'images/student_photo.jpg' %}" alt="Student Photo" class="student-photo" />
+        {% endif %}
       </div>
       <!-- Secondary Information -->
       <div class="bottom_info">
