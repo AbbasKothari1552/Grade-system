@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.contrib import messages
 from django.http import Http404
-from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
+from .models import ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
 import json
 
 # Base Page Student enrollement Entry.
@@ -32,8 +32,6 @@ def student_grade_view(request):
         try:
             enrollment = request.GET.get('enrollment')
             name = request.GET.get('name')
-
-            print(name)
 
             if enrollment:
                 # Search by enrollment number
@@ -69,7 +67,7 @@ def student_grade_view(request):
                     ).first()
 
                     if main_exam:
-                        failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade="FF")
+                        failed_subjects = GradeData.objects.filter(student_exam=main_exam, grade__in=["FF", "FF*", "nan"])
                         grades = GradeData.objects.filter(
                             student_exam=student_exam,
                             subject_bss__in=failed_subjects.values_list('subject_bss', flat=True)

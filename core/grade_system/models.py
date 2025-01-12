@@ -1,8 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
-
 # Branch Model
 class Branch(models.Model):
     id = models.AutoField(primary_key=True)
@@ -76,7 +73,7 @@ class StudentInfo(models.Model):
     college_code = models.IntegerField()
     college_name = models.CharField(max_length=100)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None)
+    image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None, null=True, blank=True, default="NULL")
 
     def __str__(self):
         return self.name
@@ -98,7 +95,7 @@ class GradeData(models.Model):
     id = models.AutoField(primary_key=True)
     student_exam= models.ForeignKey(StudentExam, on_delete=models.CASCADE)
     subject_bss = models.ForeignKey(BranchSubjectSemester, on_delete=models.CASCADE)
-    grade = models.CharField(max_length=2)
+    grade = models.CharField(max_length=5)
 
     def __str__(self):
         return f"{self.student_exam.student_info.name} - {self.subject_bss.subject.subject_name}: {self.grade}"
@@ -117,7 +114,7 @@ class Result(models.Model):
     cgpa = models.FloatField()
     backlog = models.IntegerField(default=0)
     ufm = models.BooleanField()
-    result = models.CharField(choices=result_choice,max_length=4)
+    result = models.CharField(choices=result_choice,max_length=10)
 
     def __str__(self):
         return f"Result of {self.student_exam.student_info.name} - Exam {self.student_exam.exam_data.exam_name}"

@@ -138,7 +138,6 @@ def process_excel_file(file):
                         subject_bss=branch_subject,
                         grade=grade,
                     )
-                    print(gd)
     
                 # Step 6: Add Result
                 Result.objects.get_or_create(
@@ -161,15 +160,11 @@ def process_excel_file(file):
 
 
 def upload_data(request):
-
-   
-
     if request.method == 'POST':
         file = request.FILES.get('file')
         process_excel_file(file)
         return redirect("upload_data")
     return render(request, "upload_data.html")
-
 
 
 def upload_images(request):
