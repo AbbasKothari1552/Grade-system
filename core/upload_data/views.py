@@ -1,4 +1,5 @@
 import pandas as pd
+from django.core.exceptions import *
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.shortcuts import render, redirect
@@ -48,6 +49,7 @@ def process_excel_file(file):
         data = load_file(file)
 
         with transaction.atomic():
+            
             for _, row in data.iterrows():
                 # Extract Student Info
                 spid = row['SPDID']
@@ -79,12 +81,14 @@ def process_excel_file(file):
                     spid=spid,
                     defaults={
                         'enrollment': enrollment,
+                        
                         'name': name,
                         'gender': gender,
                         'date_of_birth': dob,
                         'faculty_name': faculty_name,
                         'college_code': college_code,
                         'college_name': college_name,
+                        'admission_year':"20"+str(enrollment)[1]+str(enrollment)[2],
                         'branch': Branch.objects.get(branch_code=program_code),
                     }
                 )
@@ -123,11 +127,14 @@ def process_excel_file(file):
                     if not subject:
                         raise IntegrityError(f"Subject with code {paper_code} is missing from the database.")
 
-                    branch_subject = BranchSubjectSemester.objects.get(
+                    branch_subject,created = BranchSubjectSemester.objects.get_or_create(
                         subject=subject,
                         branch=student.branch,
-                        semester=semester
+                        semester=semester,
+                        batch_year="20"+str(enrollment)[1]+str(enrollment)[2],
+                        
                     )
+                    print(branch_subject)
 
                     if not branch_subject:
                         raise IntegrityError(f"Subject {paper_code} ({subject_name}) is not configured for branch {program_code} and semester {semester}.")
@@ -164,7 +171,11 @@ def upload_data(request):
         file = request.FILES.get('file')
         process_excel_file(file)
         return redirect("upload_data")
-    return render(request, "upload_data.html")
+    subjects=Subject.objects.all()
+    branch=Branch.objects.all()
+    bss=BranchSubjectSemester.objects.all()
+    examdata=ExamData.objects.all()
+    return render(request, "upload_data.html",{"subjects":subjects,"branches":branch,"bss":bss,"exam":examdata})
 
 
 def upload_images(request):
@@ -201,3 +212,78 @@ def upload_images(request):
     messages.error(request, "Invalid request method.")
     return redirect('upload_data')  # Redirect for non-POST requests
 
+def create_subject(request):
+    if request.method=="POST":
+        print("req recieved")
+        name=request.POST.get("subname")
+        code=request.POST.get("subcode")
+        credits=request.POST.get("credits")
+        year=request.POST.get("year")
+        print(name,code,year,credits)
+        try:           
+            sub,created=Subject.objects.get_or_create(subject_code=code,batch_year=year)           
+            messages.error(request,"Subject Already Exists")
+            return redirect("upload_data")         
+        except IntegrityError:
+            try:
+                sub,created=Subject.objects.get_or_create(subject_name=name,subject_code=code,batch_year=year,credits=credits)
+                messages.success(request,"New Subject Added")
+                return redirect("upload_data")
+            except (ValueError):
+                messages.error(request,ValueError)
+                return redirect("upload_data")
+            except(IntegrityError):
+                messages.error(request,"Subject Code Already Assigned")
+                return redirect("upload_data")
+        except ValueError:
+            messages.error(request,"Subject Code and Credits Must be A Number")
+            return redirect("upload_data")
+        
+       
+            
+def map_subject(request):
+    if request.method=="POST":
+        print("page reached")
+        try:
+            sc=request.POST.get("subject")
+            subject=Subject.objects.get(subject_code=sc)
+            bc=request.POST.get("branch")
+            branch=Branch.objects.get(branch_code=bc)
+            sem=request.POST.get("sem")
+            year=request.POST.get("bssyear")
+            subtype=request.POST.get("core")
+            if subtype=="Core":
+                bss,created=BranchSubjectSemester.objects.get_or_create(subject=subject,branch=branch,semester=sem,batch_year=year,is_core=True)
+            else:
+                bss,created=BranchSubjectSemester.objects.get_or_create(subject=subject,branch=branch,semester=sem,batch_year=year,is_core=False,elective_group=subtype)
+
+            if created==False:
+                messages.error(request,"Mapping Already Exists")
+                return redirect("upload_data")
+            messages.success(request,"Subject Mapped")
+            return redirect("upload_data")
+        except Exception as es:
+            print("error aaya")
+            messages.success(request,es)
+            return redirect("upload_data")
+    else:
+        return redirect("upload_data")
+
+
+def unmap(request):
+    if request.method=="POST":
+        bid=request.POST.get("del_map")
+        print(bid)
+        bss=BranchSubjectSemester.objects.get(id=bid)
+        bss.delete()
+        messages.success(request,"Subject Unmapped")
+        return redirect("upload_data")
+def delete_data(request):
+    if request.method=="POST":
+        exid=request.POST.get("del_dat")
+        print(exid)
+        exam=ExamData.objects.get(id=exid)
+        exam.delete()
+        print("data Deleted")
+        messages.success(request,"Data Deleted")
+        return redirect("upload_data")

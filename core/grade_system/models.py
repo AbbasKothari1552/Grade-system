@@ -16,6 +16,7 @@ class Subject(models.Model):
     subject_code = models.IntegerField(unique=True)
     subject_name = models.CharField(max_length=100, unique=True)
     credits = models.IntegerField()
+    batch_year=models.CharField( max_length=4,null=True,blank=True)
 
     def __str__(self):
         return self.subject_name
@@ -48,14 +49,15 @@ class BranchSubjectSemester(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     semester = models.CharField(max_length=12) # Changed from integer to char according to excel sheet.
-    is_core = models.BooleanField()
+    is_core = models.BooleanField(null=True)
+    batch_year=models.CharField(max_length=4,null=True,blank=True)
     elective_group = models.CharField(max_length=50, blank=True, null=True,choices=type)
 
     class Meta:
-        unique_together = ('subject', 'branch', 'semester')
+        unique_together = ('subject', 'branch', 'semester','batch_year')
 
     def __str__(self):
-        return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}"
+        return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}- Batch{self.batch_year}"
 
 # Student Info Model
 class StudentInfo(models.Model):
@@ -72,6 +74,7 @@ class StudentInfo(models.Model):
     faculty_name = models.CharField(max_length=100,)
     college_code = models.IntegerField()
     college_name = models.CharField(max_length=100)
+    admission_year=models.CharField(max_length=4,null=True)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None, null=True, blank=True, default="NULL")
 
