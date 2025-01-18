@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Field
-from .models import Branch, Subject, ExamData, BranchSubjectSemester, StudentInfo, StudentExam, GradeData, Result
+from .models import Branch, Subject, ExamData, StudentInfo, StudentExam, GradeData, Result, CollegeName
 
 #filters
 class customFilter(admin.ModelAdmin):
@@ -14,7 +14,8 @@ class customFilter(admin.ModelAdmin):
 admin.site.register(Branch,customFilter)
 admin.site.register(Subject,customFilter)
 admin.site.register(ExamData,customFilter)
-admin.site.register(BranchSubjectSemester,customFilter)
+# admin.site.register(BranchSubjectSemester,customFilter)
+admin.site.register(CollegeName, customFilter)
 admin.site.register(StudentInfo,customFilter)
 admin.site.register(StudentExam,customFilter)
 admin.site.register(GradeData,customFilter)

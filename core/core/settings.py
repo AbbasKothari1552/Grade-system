@@ -67,7 +67,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'grade sys',
+        'NAME': 'grade_system',
         'USER': 'root',
         'PASSWORD': '125863',
         'HOST': 'localhost',
