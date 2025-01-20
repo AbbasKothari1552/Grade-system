@@ -46,7 +46,7 @@
         </li>
         {% endif %}
       </ul>
-      <p style="position: absolute; bottom: 70px;">Made by: ADIT team</p>
+      <p style="position: absolute; bottom: 70px;">Made by: ADIT Design Labs</p>
     </div>
 
     <!-- Main Content -->
@@ -54,17 +54,25 @@
       <!-- div for messages from backend -->
       <div>
         {% if messages %}
-          <div class="msg alert alert-danger alert-dismissible fade show" role="alert">
-            {% for message in messages %}
-              <p class="message">{{ message }}</p>
-            {% endfor %}
+        <div>
+          {% for message in messages %}
+          <div class="msg alert 
+        {% if message.tags == 'success' %} alert-success 
+        {% elif message.tags == 'error' %} alert-danger 
+        {% else %} alert-info 
+        {% endif %} 
+        alert-dismissible fade show" role="alert">
+            <p class="message">{{ message }}</p>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
-            </button>         
+            </button>
           </div>
+          {% endfor %}
+        </div>
         {% endif %}
+
       </div>
-      
+
       {% block content %} {% endblock %}
     </div>
   </div>
@@ -73,13 +81,14 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script>
-  
-  
+
+
   document.getElementById('printButton').addEventListener('click', function () {
-      // Trigger the print dialog
-      window.print();
+    // Trigger the print dialog
+    window.print();
   });
 
 
 </script>
+
 </html>

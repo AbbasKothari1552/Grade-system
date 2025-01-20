@@ -16,12 +16,12 @@
       <div class="top_info">
         <div class="row">
           <div class="col-md-6 text-left text-md-left text-center">
-            <p><b>Name:</b>  {{student.name}}</p>
-            <p><b>Enrollment No:</b> {{student.enrollment}}</p>
+            <p><b>Name:</b>  {{ student.name }}</p>
+            <p><b>Enrollment No:</b> {{ student.enrollment }}</p>
           </div>
           <div class="col-md-6 text-md-right text-center">
-            <p><b>SPID:</b> {{student.spid}}</p>
-            <p><b>Academic Year:</b> 2022-2023</p>
+            <p><b>SPID:</b> {{ student.spid }}</p>
+            <p><b>Admission Year:</b> {{ admission_year }}</p>
           </div>
         </div>
         {% if student.image %}
@@ -112,8 +112,8 @@
         </tr>
         {% for grade in exam.grades %}
         <tr>
-          <td>{{grade.subject_bss.subject.subject_code}}</td>
-          <td>{{grade.subject_bss.subject.subject_name}}</td>
+          <td>{{grade.subject.subject_code}}</td>
+          <td>{{grade.subject.subject_name}}</td>
           <td>{{grade.grade}}</td>
         </tr>
         {% endfor %}

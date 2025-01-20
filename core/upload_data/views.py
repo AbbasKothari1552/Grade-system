@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from grade_system.models import StudentInfo, ExamData, StudentExam, BranchSubjectSemester, Subject, GradeData, Result, Branch
+from grade_system.models import StudentInfo, ExamData, StudentExam, Subject, GradeData, Result, Branch, CollegeName
 
 
 def load_file(file):
@@ -42,7 +42,7 @@ def load_file(file):
 
 
 
-def process_excel_file(file):
+def process_excel_file(request, file):
 
     try:
         # Step 1: Parse Excel file
@@ -76,32 +76,45 @@ def process_excel_file(file):
                 result_status = row['RESULT']
                 ufm = row['UFM']
 
+                college, created_college = CollegeName.objects.get_or_create(
+                    college_code = college_code,
+                    college_name = college_name
+                )
+
+                branch, created_branch = Branch.objects.get_or_create(
+                    branch_code = program_code,
+                    branch_name = program_name
+                )
+
                 # Step 2: Add or Get StudentInfo
                 student, created_student = StudentInfo.objects.get_or_create(
                     spid=spid,
                     defaults={
                         'enrollment': enrollment,
-                        
                         'name': name,
                         'gender': gender,
                         'date_of_birth': dob,
                         'faculty_name': faculty_name,
-                        'college_code': college_code,
-                        'college_name': college_name,
+                        'college': college,
+                        'branch': branch,
                         'admission_year':"20"+str(enrollment)[1]+str(enrollment)[2],
-                        'branch': Branch.objects.get(branch_code=program_code),
                     }
                 )
 
                 # Step 3: Add or Get ExamData
                 exam, created_exam = ExamData.objects.get_or_create(
                     exam_name=exam_name,
-                    exam_month=exam_month,
-                    exam_year=exam_year,
-                    exam_type=exam_type,
                     semester=semester,
-                    declaration_date=declaration_date, # **on hold for now, ask sir**
-                    academic_year=academic_year
+                    branch=branch,
+                    college=college,
+                    defaults={
+                        'exam_month': exam_month,
+                        'exam_year': exam_year,
+                        'exam_type': exam_type,
+                        'declaration_date': declaration_date,
+                        'academic_year': academic_year,
+                        'admission_year':"20"+str(enrollment)[1]+str(enrollment)[2],
+                    }
                 )
 
                 # Step 4: Add or Get StudentExam
@@ -113,39 +126,30 @@ def process_excel_file(file):
 
                 # Step 5: Validate Subjects and Add Grades
                 for i in range(1, 12):  # Loop through all subjects (SUB1 to SUB11)
-                    paper_code = row.get(f'SUB{i}PaperCode')
+                    subject_code = row.get(f'SUB{i}PaperCode')
                     subject_name = row.get(f'SUB{i}Name')
                     credits = row.get(f'SUB{i}Credits')
                     grade = row.get(f'SUB{i}OverallGrade1')
 
-                    if pd.isna(paper_code) or pd.isna(subject_name):
+                    if pd.isna(subject_code) or pd.isna(subject_name):
                         # Skip if the subject is not provided
                         continue
 
-                    # Check if the subject exists in the BranchSubjectSemester model
-                    subject = Subject.objects.filter(subject_code=paper_code).first()
-                    if not subject:
-                        raise IntegrityError(f"Subject with code {paper_code} is missing from the database.")
-
-                    branch_subject,created = BranchSubjectSemester.objects.get_or_create(
-                        subject=subject,
-                        branch=student.branch,
-                        semester=semester,
-                        batch_year="20"+str(enrollment)[1]+str(enrollment)[2],
-                        
+                    subject, created_subject = Subject.objects.get_or_create(
+                        subject_code = subject_code,
+                        subject_name = subject_name,
+                    defaults={
+                        'credits': credits,
+                    }
                     )
-                    print(branch_subject)
-
-                    if not branch_subject:
-                        raise IntegrityError(f"Subject {paper_code} ({subject_name}) is not configured for branch {program_code} and semester {semester}.")
 
                     # Add GradeData
-                    gd=GradeData.objects.create(
+                    GradeData.objects.create(
                         student_exam=student_exam,
-                        subject_bss=branch_subject,
+                        subject=subject,
                         grade=grade,
                     )
-    
+
                 # Step 6: Add Result
                 Result.objects.get_or_create(
                     student_exam=student_exam,
@@ -159,23 +163,33 @@ def process_excel_file(file):
                 )
 
         print("All data successfully processed and saved.")
+        messages.success(request, "All data successfully processed and saved.")
 
     except IntegrityError as e:
         print(f"Transaction failed: {e}")
+        messages.error(request, e)
     except Exception as e:
         print(f"Error processing file: {e}")
+        messages.error(request, e)
 
 
 def upload_data(request):
     if request.method == 'POST':
         file = request.FILES.get('file')
-        process_excel_file(file)
+        process_excel_file(request, file)
         return redirect("upload_data")
-    subjects=Subject.objects.all()
-    branch=Branch.objects.all()
-    bss=BranchSubjectSemester.objects.all()
-    examdata=ExamData.objects.all()
-    return render(request, "upload_data.html",{"subjects":subjects,"branches":branch,"bss":bss,"exam":examdata})
+    
+    # pass exam names with college name
+    exam_data = ExamData.objects.all()
+    # get all colleges name
+    colleges = CollegeName.objects.all()
+
+    context = {
+        'exam_data': exam_data,
+        'colleges': colleges
+    }
+
+    return render(request, "upload_data.html", context)
 
 
 def upload_images(request):
@@ -212,78 +226,17 @@ def upload_images(request):
     messages.error(request, "Invalid request method.")
     return redirect('upload_data')  # Redirect for non-POST requests
 
-def create_subject(request):
-    if request.method=="POST":
-        print("req recieved")
-        name=request.POST.get("subname")
-        code=request.POST.get("subcode")
-        credits=request.POST.get("credits")
-        year=request.POST.get("year")
-        print(name,code,year,credits)
-        try:           
-            sub,created=Subject.objects.get_or_create(subject_code=code,batch_year=year)           
-            messages.error(request,"Subject Already Exists")
-            return redirect("upload_data")         
-        except IntegrityError:
-            try:
-                sub,created=Subject.objects.get_or_create(subject_name=name,subject_code=code,batch_year=year,credits=credits)
-                messages.success(request,"New Subject Added")
-                return redirect("upload_data")
-            except (ValueError):
-                messages.error(request,ValueError)
-                return redirect("upload_data")
-            except(IntegrityError):
-                messages.error(request,"Subject Code Already Assigned")
-                return redirect("upload_data")
-        except ValueError:
-            messages.error(request,"Subject Code and Credits Must be A Number")
-            return redirect("upload_data")
-        
-       
-            
-def map_subject(request):
-    if request.method=="POST":
-        print("page reached")
-        try:
-            sc=request.POST.get("subject")
-            subject=Subject.objects.get(subject_code=sc)
-            bc=request.POST.get("branch")
-            branch=Branch.objects.get(branch_code=bc)
-            sem=request.POST.get("sem")
-            year=request.POST.get("bssyear")
-            subtype=request.POST.get("core")
-            if subtype=="Core":
-                bss,created=BranchSubjectSemester.objects.get_or_create(subject=subject,branch=branch,semester=sem,batch_year=year,is_core=True)
-            else:
-                bss,created=BranchSubjectSemester.objects.get_or_create(subject=subject,branch=branch,semester=sem,batch_year=year,is_core=False,elective_group=subtype)
 
-            if created==False:
-                messages.error(request,"Mapping Already Exists")
-                return redirect("upload_data")
-            messages.success(request,"Subject Mapped")
-            return redirect("upload_data")
-        except Exception as es:
-            print("error aaya")
-            messages.success(request,es)
-            return redirect("upload_data")
-    else:
-        return redirect("upload_data")
-
-
-def unmap(request):
-    if request.method=="POST":
-        bid=request.POST.get("del_map")
-        print(bid)
-        bss=BranchSubjectSemester.objects.get(id=bid)
-        bss.delete()
-        messages.success(request,"Subject Unmapped")
-        return redirect("upload_data")
 def delete_data(request):
+
     if request.method=="POST":
-        exid=request.POST.get("del_dat")
-        print(exid)
-        exam=ExamData.objects.get(id=exid)
+        exam_name=request.POST.get("exam_name")
+        college_name=request.POST.get("college_name")
+        print(exam_name, college_name)
+        exam=ExamData.objects.filter(exam_name=exam_name, college__college_name=college_name)
         exam.delete()
         print("data Deleted")
         messages.success(request,"Data Deleted")
         return redirect("upload_data")
+    
+    return redirect("upload_data")

@@ -1,110 +1,201 @@
-/* style for student.html */
+/* Main container for centering */
 .content {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh);
-    flex-direction: column;
+    min-height: 100vh;
     box-sizing: border-box;
+    padding: 10px;
+}
+
+/* Styling the search section */
+.search-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.enrollment_div,
+.name_div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #555;
+    text-align: left;
+}
+
+input {
+    flex: 1;
+    height: 35px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
 }
 
 .search {
     background-color: #005384;
-    color: white;
-    width: 100px;
-    height: 35px;
-    border-radius: 5px;
+    color: #fff;
+    padding: 8px 20px;
     border: none;
-    cursor: pointer;
-}
-
-input {
-    height: 35px;
-    width: 350px;
     border-radius: 5px;
-    border: 1px solid #a3a3a3;
-    margin-right: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.search:hover {
+    background-color: #003d63;
+}
+
+.or {
+    display: inline-block;
+    margin: 20px auto;
     padding: 10px;
-
-}
-
-.enrollment_div{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.enrollment_text {
-    font-size: 18px;
-    color: black;
-    margin-bottom: 25px;
-
-}
-.name_text {
-    font-size: 18px;
-    color: black;
-    margin-bottom: 25px;
-}
-#enrollment::placeholder{
-    opacity: 0.8;
-}
-#name-search::placeholder{
-    opacity: 0.8;
-}
-.enroll{
-    
-    display:flex;
-    flex-direction:column;
-    align-items: center;
-}
-.name{
-    display:flex;
-    flex-direction:column;
-    align-items: center;
-}
-.or{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 42px 0px;
-    height: 35px;
-    width: 70px;
-    border: 1px solid #757575;
+    font-weight: bold;
+    color: #757575;
+    background: #e0e0e0;
     border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    line-height: 30px;
 }
-.name_div {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative; /* Set relative position for the container */
-}
-
-
-
+/* Styling for the suggestions box */
 #suggestions-box {
-    position: absolute; /* Make it relative to the parent container */
-    top: 45px; /* Adjust the top value to align the suggestions box below the search bar */
+    position: absolute;
+    top: 74%; /* Aligns the top of the box to the bottom of the input field */
     left: 0;
-    width: 100%; /* Match the width of the input */
-    max-height: 180px; /* Limit the height for scrollable suggestions */
+    right: 0; /* Ensures the width matches the input field */
+    max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #B7B7B7;
+    border: 1px solid #ccc;
     border-radius: 5px;
     background-color: white;
-    z-index: 10; /* Ensure it appears above other elements */
+    z-index: 10;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: none; /* Hide by default */
-}
-
-#suggestions-box div {
-    padding: 10px;
+    display: none; /* Hidden by default */
     font-size: 14px;
     color: #333;
-    cursor: pointer;
-    
 }
 
-#suggestions-box div:hover {
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:hover,
+.suggestion-item.highlight {
     background-color: #f0f0f0;
     color: #005384;
+}
+
+.no-results {
+    padding: 10px;
+    color: #757575;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Smooth scrolling for suggestions */
+#suggestions-box {
+    scroll-behavior: smooth;
+}
+
+/* Centering the box */
+.search-box {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    transform: translate(-60%, -60%);
+    width: 90%;
+    max-width: 600px;
+    padding: 40px;
+    background-color: #f0f4fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Input fields and buttons styling */
+.search-box input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-box button {
+    background-color: #005384;
+    color: #fff;
+    border: none;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.search-box button:hover {
+    background-color: #002d66;
+}
+
+.search-box .or-divider {
+    text-align: center;
+    margin: 15px 0;
+    font-size: 20px;
+    color: #666;
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .search-container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .search-box {
+        padding: 20px;
+    }
+
+    .search-box input[type="text"] {
+        font-size: 14px;
+    }
+
+    .search-box button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    label {
+        font-size: 16px;
+    }
+
+    .search {
+        padding: 6px 16px;
+        font-size: 12px;
+    }
+
+    .or {
+        width: 40px;
+        height: 40px;
+        line-height: 25px;
+        font-size: 12px;
+    }
 }
