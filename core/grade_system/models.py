@@ -71,6 +71,7 @@ class ExamData(models.Model):
 #     def __str__(self):
 #         return f"{self.branch.branch_name} - {self.subject.subject_name} - Sem {self.semester}- Batch{self.batch_year}"
 
+
 # Student Info Model
 class StudentInfo(models.Model):
     gender_type=[

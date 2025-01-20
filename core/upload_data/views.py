@@ -149,7 +149,7 @@ def process_excel_file(request, file):
                         subject=subject,
                         grade=grade,
                     )
-
+    
                 # Step 6: Add Result
                 Result.objects.get_or_create(
                     student_exam=student_exam,
@@ -228,7 +228,6 @@ def upload_images(request):
 
 
 def delete_data(request):
-
     if request.method=="POST":
         exam_name=request.POST.get("exam_name")
         college_name=request.POST.get("college_name")
@@ -238,5 +237,5 @@ def delete_data(request):
         print("data Deleted")
         messages.success(request,"Data Deleted")
         return redirect("upload_data")
-    
     return redirect("upload_data")
+

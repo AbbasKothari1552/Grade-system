@@ -30,7 +30,6 @@ def student_grade_view(request):
         try:
             enrollment = request.GET.get('enrollment')
             name = request.GET.get('name')
-
             if enrollment:
                 # Search by enrollment number
                 student = get_object_or_404(StudentInfo, enrollment=enrollment)
@@ -179,7 +178,6 @@ def semester(request):
     }
     return render(request, "semester.html", context)
 
-
 # Semester-wise analysis view
 def semester_analysis_view(request, semester, year, branch, college, type):
 
@@ -241,5 +239,6 @@ def semester_analysis_view(request, semester, year, branch, college, type):
         'subjects': subject_names,  # Subject names to display in table headers
         'student_grades': student_grades,  # Student grades to display in rows
     }
+
 
     return render(request, "semester_data.html", context)
