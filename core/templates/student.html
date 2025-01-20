@@ -1,60 +1,91 @@
-{% extends 'base.html' %} {% load static %} {% block extra_css %}
+{% extends 'base.html' %} {% load static %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/student.css' %}" />
-{% endblock %} {% block content %}
-<div class="enroll">
-  <p class="enrollment_text">Enter the enrollment number of the student</p>
-  <form method="get", action="{% url 'student_data' %}">
-    {% csrf_token %}
-    <div class="enrollment_div">
-      <label for="enrollment">Enrollment Number:</label>
-      <input type="text" name="enrollment" id="enrollment" />
-      <button type="submit">Search</button>
-    </div>
-  </form>
-</div>
-  <span class="or">OR</span>
- <div class="name">
-  <p class="name_text">Enter the name of the student</p>
-  <form  method="get", action="{% url 'student_data' %}">
-    <div class="name_div">
-      <label for="enrollment">Name:</label>
-      <input type="text" name="name" id="name-search" placeholder="Search by name">
-      <div id="suggestions-box"></div>
-      <button type="submit">Search</button>
-    </div>
-  </form>
-</div>
+{% endblock %}
+{% block content %}
 
-<!-- script for giving name suggestion of students. -->
+<div class="search-box">
+  <form method="get" , action="{% url 'student_data' %}">
+    {% csrf_token %}
+    <label for="enrollment">Enter the enrollment number of student</label><br>
+    <input type="text" id="enrollment" name="enrollment" placeholder="e.g. 12102130501011 (14-digits)" />
+    <button type="submit">Search</button>
+  </form>
+  <br>
+
+  <div class="or-divider">OR</div>
+
+ 
+  <form method="get" ,  action="{% url 'student_data' %}">
+    {% csrf_token %}
+    <label for="name-search">Enter the name of student</label><br>
+    <input type="text" id="name-search" name="name" placeholder="Enter student name as on record" />
+    <div id="suggestions-box"></div>
+    <button type="submit">Search</button>
+  </form>
+</div>
 <script>
+
   const input = document.getElementById('name-search');
   const suggestionsBox = document.getElementById('suggestions-box');
+  suggestionsBox.style.display = 'none';
+  let currentIndex = -1; // To track keyboard navigation
 
   input.addEventListener('input', function () {
-      const query = this.value;
-
-      if (query.length > 0) {
-          fetch(`/name-suggestions/?query=${query}`)
-              .then(response => response.json())
-              .then(data => {
-                  suggestionsBox.innerHTML = '';
-                  if (data.suggestions && data.suggestions.length > 0) {
-                      data.suggestions.forEach(name => {
-                          const suggestion = document.createElement('div');
-                          suggestion.textContent = name;
-                          suggestion.addEventListener('click', () => {
-                              input.value = name;
-                              suggestionsBox.innerHTML = ''; // Clear suggestions
-                          });
-                          suggestionsBox.appendChild(suggestion);
-                      });
-                  }
+    const query = this.value.trim();
+    currentIndex = -1; // Reset index
+    if (query.length > 0) {
+      fetch(`/name-suggestions/?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+          suggestionsBox.innerHTML = '';
+          if (data.suggestions && data.suggestions.length > 0) {
+            data.suggestions.forEach((name, index) => {
+              const suggestion = document.createElement('div');
+              suggestion.innerHTML = name.replace(
+                new RegExp(query, 'gi'),
+                match => `<strong>${match}</strong>` // Highlight match
+              );
+              suggestion.className = 'suggestion-item';
+              suggestion.addEventListener('click', () => {
+                input.value = name;
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.style.display = 'none';
               });
-      } else {
-          suggestionsBox.innerHTML = ''; // Clear suggestions
-      }
+              suggestionsBox.appendChild(suggestion);
+            });
+            suggestionsBox.style.display = 'block';
+          } else {
+            suggestionsBox.innerHTML = '<div class="no-results">No results found</div>';
+            suggestionsBox.style.display = 'block';
+          }
+        });
+    } else {
+      suggestionsBox.style.display = 'none';
+    }
   });
+
+  // Keyboard navigation
+  input.addEventListener('keydown', function (e) {
+    const items = suggestionsBox.querySelectorAll('.suggestion-item');
+    if (e.key === 'ArrowDown') {
+      currentIndex = (currentIndex + 1) % items.length;
+      highlightItem(items);
+    } else if (e.key === 'ArrowUp') {
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      highlightItem(items);
+    } else if (e.key === 'Enter' && currentIndex >= 0) {
+      e.preventDefault();
+      input.value = items[currentIndex].textContent;
+      suggestionsBox.innerHTML = '';
+      suggestionsBox.style.display = 'none';
+    }
+  });
+
+  function highlightItem(items) {
+    items.forEach((item, index) => {
+      item.classList.toggle('highlight', index === currentIndex);
+    });
+  }
 </script>
-
-
 {% endblock %}

@@ -1,9 +1,10 @@
 import pandas as pd
+from django.core.exceptions import *
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.shortcuts import render, redirect
-from datetime import datetime
-from grade_system.models import StudentInfo, ExamData, StudentExam, BranchSubjectSemester, Subject, GradeData, Result, Branch
+from django.contrib import messages
+from grade_system.models import StudentInfo, ExamData, StudentExam, Subject, GradeData, Result, Branch, CollegeName
 
 
 def load_file(file):
@@ -41,13 +42,14 @@ def load_file(file):
 
 
 
-def process_excel_file(file):
+def process_excel_file(request, file):
 
     try:
         # Step 1: Parse Excel file
         data = load_file(file)
 
         with transaction.atomic():
+            
             for _, row in data.iterrows():
                 # Extract Student Info
                 spid = row['SPDID']
@@ -74,6 +76,16 @@ def process_excel_file(file):
                 result_status = row['RESULT']
                 ufm = row['UFM']
 
+                college, created_college = CollegeName.objects.get_or_create(
+                    college_code = college_code,
+                    college_name = college_name
+                )
+
+                branch, created_branch = Branch.objects.get_or_create(
+                    branch_code = program_code,
+                    branch_name = program_name
+                )
+
                 # Step 2: Add or Get StudentInfo
                 student, created_student = StudentInfo.objects.get_or_create(
                     spid=spid,
@@ -83,21 +95,26 @@ def process_excel_file(file):
                         'gender': gender,
                         'date_of_birth': dob,
                         'faculty_name': faculty_name,
-                        'college_code': college_code,
-                        'college_name': college_name,
-                        'branch': Branch.objects.get(branch_code=program_code),
+                        'college': college,
+                        'branch': branch,
+                        'admission_year':"20"+str(enrollment)[1]+str(enrollment)[2],
                     }
                 )
 
                 # Step 3: Add or Get ExamData
                 exam, created_exam = ExamData.objects.get_or_create(
                     exam_name=exam_name,
-                    exam_month=exam_month,
-                    exam_year=exam_year,
-                    exam_type=exam_type,
                     semester=semester,
-                    declaration_date=declaration_date, # **on hold for now, ask sir**
-                    academic_year=academic_year
+                    branch=branch,
+                    college=college,
+                    defaults={
+                        'exam_month': exam_month,
+                        'exam_year': exam_year,
+                        'exam_type': exam_type,
+                        'declaration_date': declaration_date,
+                        'academic_year': academic_year,
+                        'admission_year':"20"+str(enrollment)[1]+str(enrollment)[2],
+                    }
                 )
 
                 # Step 4: Add or Get StudentExam
@@ -109,34 +126,28 @@ def process_excel_file(file):
 
                 # Step 5: Validate Subjects and Add Grades
                 for i in range(1, 12):  # Loop through all subjects (SUB1 to SUB11)
-                    paper_code = row.get(f'SUB{i}PaperCode')
+                    subject_code = row.get(f'SUB{i}PaperCode')
                     subject_name = row.get(f'SUB{i}Name')
                     credits = row.get(f'SUB{i}Credits')
                     grade = row.get(f'SUB{i}OverallGrade1')
 
-                    if pd.isna(paper_code) or pd.isna(subject_name):
+                    if pd.isna(subject_code) or pd.isna(subject_name):
                         # Skip if the subject is not provided
                         continue
 
-                    # Check if the subject exists in the BranchSubjectSemester model
-                    subject = Subject.objects.filter(subject_code=paper_code).first()
-                    if not subject:
-                        raise IntegrityError(f"Subject with code {paper_code} is missing from the database.")
-
-                    branch_subject = BranchSubjectSemester.objects.filter(
-                        subject=subject,
-                        branch_id=student.branch_id,
-                        semester=semester
-                    ).first()
-
-                    if not branch_subject:
-                        raise IntegrityError(f"Subject {paper_code} ({subject_name}) is not configured for branch {program_code} and semester {semester}.")
+                    subject, created_subject = Subject.objects.get_or_create(
+                        subject_code = subject_code,
+                        subject_name = subject_name,
+                    defaults={
+                        'credits': credits,
+                    }
+                    )
 
                     # Add GradeData
-                    GradeData.objects.get_or_create(
+                    GradeData.objects.create(
                         student_exam=student_exam,
-                        subject_bss=branch_subject,
-                        defaults={'grade': grade}
+                        subject=subject,
+                        grade=grade,
                     )
     
                 # Step 6: Add Result
@@ -152,37 +163,79 @@ def process_excel_file(file):
                 )
 
         print("All data successfully processed and saved.")
+        messages.success(request, "All data successfully processed and saved.")
 
     except IntegrityError as e:
         print(f"Transaction failed: {e}")
+        messages.error(request, e)
     except Exception as e:
         print(f"Error processing file: {e}")
+        messages.error(request, e)
 
 
 def upload_data(request):
-
-    user = False
-    if request.user.is_superuser:
-        user = True
-
     if request.method == 'POST':
         file = request.FILES.get('file')
-        process_excel_file(file)
+        process_excel_file(request, file)
         return redirect("upload_data")
     
+    # pass exam names with college name
+    exam_data = ExamData.objects.all()
+    # get all colleges name
+    colleges = CollegeName.objects.all()
+
     context = {
-        'user': user
+        'exam_data': exam_data,
+        'colleges': colleges
     }
+
     return render(request, "upload_data.html", context)
 
 
-def data_upload(request):
+def upload_images(request):
+    if request.method == "POST":
+        images = request.FILES.getlist('images')  # Get all uploaded files
+        errors = []
+        students = []
+        
+        # Step 1: Validate all images
+        for image in images:
+            image_name = (image.name).split(".")
+            try:
+                enrollment_number = int(image_name[0])  # Extract enrollment number
+                student = StudentInfo.objects.get(enrollment=enrollment_number)
+                students.append((student, image))  # Store valid students and images in a list
+            except (ValueError, IndexError):
+                errors.append(f"Invalid file name format: {image.name}")
+            except StudentInfo.DoesNotExist:
+                errors.append(f"No student found with enrollment number: {image_name[0]}")
 
-    user = False
-    if request.user.is_superuser:
-        user = True
-    
-    context = {
-        'user': user
-    }
-    return render(request, 'data_upload.html', context)
+        # Step 2: If there are errors, redirect with error messages
+        if errors:
+            for error in errors:
+                messages.error(request, error)  # Add each error message to Django messages
+            return redirect('upload_data')  # Replace 'upload_template' with the name of your template
+
+        # Step 3: Save all valid images
+        for student, image in students:
+            student.image.save(image.name, image)  # Save each image to the respective student's image field
+        
+        messages.success(request, "All images were successfully uploaded.")
+        return redirect('upload_data')  # Redirect to the same or another template after successful upload
+
+    messages.error(request, "Invalid request method.")
+    return redirect('upload_data')  # Redirect for non-POST requests
+
+
+def delete_data(request):
+    if request.method=="POST":
+        exam_name=request.POST.get("exam_name")
+        college_name=request.POST.get("college_name")
+        print(exam_name, college_name)
+        exam=ExamData.objects.filter(exam_name=exam_name, college__college_name=college_name)
+        exam.delete()
+        print("data Deleted")
+        messages.success(request,"Data Deleted")
+        return redirect("upload_data")
+    return redirect("upload_data")
+

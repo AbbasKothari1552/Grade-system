@@ -11,45 +11,50 @@
 
 <div class="container">
 
-  <div class="printableContent">
+  <div id="printableContent">
     <div class="student_info">
       <div class="top_info">
         <div class="row">
           <div class="col-md-6 text-left text-md-left text-center">
-            <p>Name: {{student.name}}</p>
-            <p>Enrollment No: {{student.enrollment}}</p>
+            <p><b>Name:</b>  {{ student.name }}</p>
+            <p><b>Enrollment No:</b> {{ student.enrollment }}</p>
           </div>
           <div class="col-md-6 text-md-right text-center">
-            <p>SPID: {{student.spid}}</p>
-            <p>Academic Year: 2022-2023</p>
+            <p><b>SPID:</b> {{ student.spid }}</p>
+            <p><b>Admission Year:</b> {{ admission_year }}</p>
           </div>
         </div>
+        {% if student.image %}
         <!-- Photo -->
+        <img src="{{student.image.url}}" alt="Student Photo" class="student-photo" />
+        {% else %}
         <img src="{% static 'images/student_photo.jpg' %}" alt="Student Photo" class="student-photo" />
+        {% endif %}
       </div>
       <!-- Secondary Information -->
       <div class="bottom_info">
         <div class="row">
           <div class="col-md-6 text-left text-md-left text-center">
-            <p>Semester: {{current_semester}}</p>
-            <p>Gender: {{student.gender}}</p>
+            <p><b>Semester:</b>  {{current_semester}}</p>
+            <p><b>Gender:</b>  {{student.gender}}</p>
           </div>
           <div class="col-md-6 text-md-right text-center">
-            <p>Program Name:</p>
+            <p><b>Program Name:</b> </p>
             <p>{{student.branch.branch_name}}</p>
           </div>
         </div>
       </div>
     </div>
-    <br><br>
-
+    <br>
+  <div style="border: 1px solid #cecebc;">
+    <p style="font-weight: 500; font-size: 15px; padding: 8px 0 0 8px;">Backlog Summary</p>
     <!-- Backlog summary Table. -->
-    <table border="black" class="table info">
+    <table border="black" class="table info" style="margin-bottom: 0.89rem;">
       <tbody>
         <!-- First Row: Semesters 1 to 4 -->
         <tr>
           {% for data in backlog_summary|slice:":4" %}
-          <td>Semester {{ data.semester }}</td>
+          <th>Semester {{ data.semester }}</th>
           {% endfor %}
         </tr>
         <tr>
@@ -57,11 +62,16 @@
           <td>{{ data.backlog }}</td>
           {% endfor %}
         </tr>
-        <br>
+      </tbody>
+    </table>
+
+    <table border="black" class="table info" style="margin-bottom: 0;" >
+      <tbody> 
         <!-- Second Row: Semesters 5 to 8 -->
+        
         <tr>
           {% for data in backlog_summary|slice:"4:8" %}
-          <td>Semester {{ data.semester }}</td>
+          <th>Semester {{ data.semester }}</th>
           {% endfor %}
         </tr>
         <tr>
@@ -70,22 +80,21 @@
           {% endfor %}
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
-    <div>
-      <br><br>
+  <div>
+      <br>
       {% for exam in exam_data %}
 
       <!-- Semester no. & Type Display Table -->
-      <table border="black" width="100%" style="color: white; background-color: #1D82C6;">
+      <table border="black" width="100%" style="color: white; background-color: #1D82C6; margin-bottom: 10px;">
         {% if exam.exam.exam_type == "REPETER" %}
         <td align="center"><b>{{exam.exam.semester}} (BACKLOG)</b></td>
         {% else %}
         <td align="center"><b>{{exam.exam.semester}}</b></td>
         {% endif %}
       </table>
-      <br>
-
+     
       <!-- semester name & backlog display table -->
       <table border="black" width="100%">
         <tr>
@@ -103,20 +112,20 @@
         </tr>
         {% for grade in exam.grades %}
         <tr>
-          <td>{{grade.subject_bss.subject.subject_code}}</td>
-          <td>{{grade.subject_bss.subject.subject_name}}</td>
+          <td>{{grade.subject.subject_code}}</td>
+          <td>{{grade.subject.subject_name}}</td>
           <td>{{grade.grade}}</td>
         </tr>
         {% endfor %}
       </table>
-      <br> <br>
+      <br> 
 
       {% endfor %}
 
 
 
     </div>
-    <button type="submit" id="printButton" style="background-color: #1D82C6;">Print</button>
+    <button type="submit" id="printButton" >Print</button>
   </div>
 
   {% endblock %}

@@ -32,15 +32,21 @@
     <div class="sidebar text-white position-fixed">
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a class="nav-link text-white" href="{% url 'student' %}">Student Grade History</a>
+          <a class="nav-link" href="{% url 'student' %}">Student Grade History</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="{% url 'subject' %}">Subject-wise Analysis</a>
+          <a class="nav-link" href="{% url 'subject' %}">Subject-wise Analysis</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="{% url 'semester' %}">Semester-wise Analysis</a>
+          <a class="nav-link" href="{% url 'semester' %}">Semester-wise Analysis</a>
         </li>
+        {% if user.is_superuser %}
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'upload_data' %}">Upload Data</a>
+        </li>
+        {% endif %}
       </ul>
+      <p style="position: absolute; bottom: 70px;">Made by: ADIT Design Labs</p>
     </div>
 
     <!-- Main Content -->
@@ -48,21 +54,40 @@
       <!-- div for messages from backend -->
       <div>
         {% if messages %}
-        <div class="alert alert-danger">
+        <div>
           {% for message in messages %}
-          <p>{{ message }}</p>
+          <div class="msg alert 
+        {% if message.tags == 'success' %} alert-success 
+        {% elif message.tags == 'error' %} alert-danger 
+        {% else %} alert-info 
+        {% endif %} 
+        alert-dismissible fade show" role="alert">
+            <p class="message">{{ message }}</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
           {% endfor %}
         </div>
         {% endif %}
+
       </div>
+
       {% block content %} {% endblock %}
     </div>
   </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script>
+
+
   document.getElementById('printButton').addEventListener('click', function () {
-      // Trigger the print dialog
-      window.print();
+    // Trigger the print dialog
+    window.print();
   });
+
+
 </script>
 </html>

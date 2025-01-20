@@ -10,12 +10,12 @@
     <div class="top_info">
       <div class="row">
         <div class="col-md-6 text-left text-md-left text-center">
-          <p>SUBJECT CODE: {{students_grade.0.subject_bss.subject.subject_code}}</p>
-          <p>SUBJECT NAME: {{students_grade.0.subject_bss.subject.subject_name}}</p>
+          <p><b> SUBJECT CODE:</b> {{students_grade.0.subject.subject_code}}</p>
+          <p><b>SUBJECT NAME:</b>  {{students_grade.0.subject.subject_name}}</p>
         </div>
         <div class="col-md-6 text-md-right text-center">
-          <p>SEMESTER: {{students_grade.0.subject_bss.semester}}</p>
-          <p>Academic Year: {{students_grade.0.student_exam.exam_data.academic_year}}</p>
+          <p><b>SEMESTER:</b>  {{ students_grade.0.student_exam.exam_data.semester|slice:"9:" }}</p>
+          <p><b> Academic Year:</b> {{ students_grade.0.student_exam.exam_data.academic_year }}</p>
         </div>
       </div>
     </div>
@@ -23,13 +23,10 @@
     <div class="bottom_info">
       <div class="row">
         <div class="col-md-6 text-left text-md-left text-center">
-          <p>Exam : {{students_grade.0.student_exam.exam_data.exam_name}}</p>
-          <p>Declaration Date : {{students_grade.0.student_exam.exam_data.declaration_date}}</p>
+          <p><b>Exam:</b>  {{students_grade.0.student_exam.exam_data.exam_name}}</p>
+          <p><b>Declaration Date:</b>{{students_grade.0.student_exam.exam_data.declaration_date}}</p>
         </div>
-        <div class="col-md-6 text-md-right text-center">
-          <p>Program Name:</p>
-          <p></p>
-        </div>
+      
       </div>
     </div>
   </div>
@@ -37,6 +34,7 @@
 
   <table border="1">
     <tr>
+      <th>Sr No.</th>
       <th>SPID</th>
       <th>Enrollment No</th>
       <th>Name</th>
@@ -44,6 +42,7 @@
     </tr>
     {% for student in students_grade %}
     <tr>
+      <td>{{ forloop.counter }}</td>
       <td>{{student.student_exam.student_info.spid}}</td>
       <td>{{student.student_exam.student_info.enrollment}}</td>
       <td>{{student.student_exam.student_info.name}}</td>
@@ -72,7 +71,7 @@
   <canvas id="gradeChart"></canvas>
     
   {% else %}
-  <h3>No Data Found for selected Parameters</h3>
+  <h3 class="error_sub">No Data Found for selected Parameters</h3>
   {% endif %}
 
 </div>

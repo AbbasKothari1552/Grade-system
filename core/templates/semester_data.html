@@ -1,23 +1,22 @@
-{% extends 'base.html' %} {% load static %} 
+{% extends 'base.html' %} {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/semesterdata.css' %}" />
 <link rel="stylesheet" href="{% static 'css/student_details.css' %}">
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 
-<div class="container">
+<div class="container-fluid">
 
   <!-- Check for Data -->
-  {% if core_table_data %}
-  
+  {% if student_grades %}
   <!-- Semester Info  -->
   <div class="student_info">
     <div class="top_info">
       <div class="row">
         <div class="col-md-6 text-left text-md-left text-center">
           <p><b>Semester:</b> {{semester}}</p>
-          <p><b>Academic Year:</b> {{academic_year}}</p>
+          <p><b>Academic Year:</b> {{year}}</p>
         </div>
         <div class="col-md-6 text-md-right text-center">
         </div>
@@ -27,61 +26,43 @@
     <div class="bottom_info">
       <div class="row">
         <div class="col-md-6 text-left text-md-left text-center">
-          <p><b>Exam:</b> {{exam}}</p>
+          <p><b>Exam:</b> {{exam_name}}</p>
           <p><b>Declaration Date:</b> {{declaration_date}}</p>
         </div>
         <div class="col-md-6 text-md-right text-center">
-          <p><b>Exam Type:</b> {{exam_type}}</p>
+          <p><b>Exam Type:</b> {{type}}</p>
           <p></p>
         </div>
       </div>
     </div>
   </div>
   <br>
-
-  <table border="1">
-    <thead>
+  <div class="table_container">
+    <table border="1">
+      <thead>
         <tr>
-            {% for header in core_headers %}
-            <th>{{header}}</th>
-            {% endfor %}
-            
-            <!-- for Professional & Open Elective grades -->
-            {% if combined_data %}
-            <th>Professional Subjects</th>
-            <th>Grade</th>
-            <th>Open Subjects</th>
-            <th>Grade</th>
-            {% endif %}
+          <th>Sr No.</th>
+          <th>Enrollment</th>
+          <th>Name</th>
+          {% for subject in subjects %}
+          <th>{{subject}}</th>
+          {% endfor %}
         </tr>
-    </thead>
-    <tbody>
-        {% if combined_data %}
-        {% for row in combined_data %}
-          <tr>
-            <!-- Core Subjects Row -->
-            {% for cell in row.core %}
-            <td>{{cell}}</td>
-            {% endfor %}
-            <!-- Elective Subjects Row -->
-            {% for cell in row.elective %}
-            <td>{{cell}}</td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-        {% else %}
-        {% for row in core_table_data %}
+      </thead>
+      <tbody>
+        {% for data in student_grades %}
         <tr>
-          <!-- Core Subjects Row -->
-          {% for cell in row %}
-          <td>{{cell}}</td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{data.enrollment}}</th>
+          <td>{{data.student_name}}</th>
+          {% for grade in data.grades %}
+          <td>{{grade}}</th>
           {% endfor %}
         </tr>
         {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
-
+      </tbody>
+    </table>
+  </div>
 
   {% else %}
   <h3>No Data Found for selected Parameters</h3>
