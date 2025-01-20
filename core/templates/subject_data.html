@@ -10,12 +10,12 @@
     <div class="top_info">
       <div class="row">
         <div class="col-md-6 text-left text-md-left text-center">
-          <p><b> SUBJECT CODE:</b> {{students_grade.0.subject_bss.subject.subject_code}}</p>
-          <p><b>SUBJECT NAME:</b>  {{students_grade.0.subject_bss.subject.subject_name}}</p>
+          <p><b> SUBJECT CODE:</b> {{students_grade.0.subject.subject_code}}</p>
+          <p><b>SUBJECT NAME:</b>  {{students_grade.0.subject.subject_name}}</p>
         </div>
         <div class="col-md-6 text-md-right text-center">
-          <p><b>SEMESTER:</b>  {{students_grade.0.subject_bss.semester}}</p>
-          <p><b> Academic Year:</b> {{students_grade.0.student_exam.exam_data.academic_year}}</p>
+          <p><b>SEMESTER:</b>  {{ students_grade.0.student_exam.exam_data.semester|slice:"9:" }}</p>
+          <p><b> Academic Year:</b> {{ students_grade.0.student_exam.exam_data.academic_year }}</p>
         </div>
       </div>
     </div>
@@ -34,6 +34,7 @@
 
   <table border="1">
     <tr>
+      <th>Sr No.</th>
       <th>SPID</th>
       <th>Enrollment No</th>
       <th>Name</th>
@@ -41,6 +42,7 @@
     </tr>
     {% for student in students_grade %}
     <tr>
+      <td>{{ forloop.counter }}</td>
       <td>{{student.student_exam.student_info.spid}}</td>
       <td>{{student.student_exam.student_info.enrollment}}</td>
       <td>{{student.student_exam.student_info.name}}</td>

@@ -1,60 +1,88 @@
-/*style for semester.html*/
+/* Improved and Symmetrical CSS for semester.html */
 .content {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh);
+    min-height: 100vh; /* Full viewport height */
     flex-direction: column;
     box-sizing: border-box;
+    padding: 20px; /* Consistent padding */
+    background-color: #ffffff; /* Background for better contrast */
+}
+
+.search-box {
+    width: 100%; /* Full width */
+    max-width: 600px; /* Limit maximum width for larger screens */
+    padding: 20px; /* Adjusted padding */
+    background-color: #f0f4fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* Modern rounded corners */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto; /* Center horizontally */
+    margin-top: 5px; /* Space from the top */
+}
+.search-box * {
+    width: 90%;
+    margin: 3px 10px;
 }
 
 button {
+    width: 100%;
+    padding: 10px;
     background-color: #005384;
     color: white;
-    width: 100px;
-    height: 35px;
-    border-radius: 5px;
-    box-shadow: none;
     border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
 }
 
-.semester {
-    height: 35px;
-    width: 50px;
-    border-radius: 5px;
-    border: 1px solid #B7B7B7;
-    margin-right: 10px;
-    padding: 4px;
-
-}
-
-.year {
-    height: 35px;
-    width: 100px;
-    border-radius: 5px;
-    border: 1px solid #B7B7B7;
-    margin-right: 10px;
-    padding: 4px;
-
-}
-
-.branch {
-    height: 35px;
-    width: 350px;
-    border-radius: 5px;
-    border: 1px solid #B7B7B7;
-    margin-right: 10px;
-    padding: 4px;
-}
-
-.semdiv {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+button:hover {
+    background-color: #003f6b; /* Darker shade on hover */
 }
 
 .sem_text {
-    font-size: 18px;
-    color: black;
-    margin-bottom: 30px;
+    font-size: 23px; /* Slightly larger for better readability */
+    color: #333333; /* Darker color for better contrast */
+    margin-top: 50px; /* Space from the top */
+    text-align: center;
+    width: 100%; /* Full width */
+    font-weight: 500; /* Medium font weight */
+}
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .search-box {
+        width: 90%; /* Wider for smaller screens */
+        padding: 15px; /* Reduced padding for smaller screens */
+    }
+
+    .semdiv {
+        flex-direction: column; /* Stack elements vertically */
+        gap: 15px; /* Consistent spacing */
+    }
+
+    .semester, .year, .branch {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    button {
+        width: 100%; /* Full width for smaller screens */
+    }
 }

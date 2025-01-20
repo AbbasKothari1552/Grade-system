@@ -87,7 +87,7 @@ class StudentInfo(models.Model):
     admission_year=models.CharField(max_length=4,blank=True)
     college = models.ForeignKey(CollegeName, on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None, null=True, blank=True, default="NULL")
+    image=models.ImageField(upload_to="images/", height_field=None, width_field=None, max_length=None, null=True, blank=True)
 
     def __str__(self):
         return self.name
