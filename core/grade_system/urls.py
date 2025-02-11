@@ -6,7 +6,7 @@ urlpatterns = [
     path('name-suggestions/', student_name_suggestions, name="name-suggestions"), 
     path('student_grades/', student_grade_view, name='student_data'),
     path('subject/', subject, name='subject'),
-    path('subject/<str:subject>/<str:year>/<str:branch>/<str:college>/<str:type>', subject_analysis_view, name='subject_data'),
+    path('subject/data/', subject_analysis_view, name='subject_data'),
     path('semester/', semester, name='semester'),
-    path('semester/<str:semester>/<str:year>/<str:branch>/<str:college>/<str:type>', semester_analysis_view, name='semester_data'),
+    path('semester/data', semester_analysis_view, name='semester_data'),
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max, Count
 from django.contrib import messages
 from django.http import Http404, JsonResponse
@@ -136,34 +136,46 @@ def subject(request):
     return render(request, "subject.html", context)
 
 # Subject wise student Data Display.
-def subject_analysis_view(request, subject, year, branch, college, type):
+def subject_analysis_view(request):
     
-    # branch = "BACHELOR OF TECHNOLOGY (COMPUTER SCIENCE AND DESIGN)"
-    students_grade = GradeData.objects.filter(
-                                            subject__subject_name=subject,
-                                            student_exam__exam_data__academic_year=year,
-                                            student_exam__student_info__branch__branch_name=branch,
-                                            student_exam__student_info__college__college_name=college,
-                                            student_exam__exam_data__exam_type=type,
-                                            ).select_related(
-                                            'student_exam__student_info__branch',
-                                            'student_exam__exam_data',
-                                            ).order_by('student_exam__student_info__enrollment')
-    # Grade counting
-    grade_counts_data = students_grade.values("grade").annotate(count=Count("grade")).order_by("grade")
+    if request.method == "GET":
+        subject = request.GET.get('subject')
+        year = request.GET.get('year')
+        branch = request.GET.get('branch')
+        type = request.GET.get('exam_type')
+        # static field
+        college = "A D PATEL INSTITUTE OF TECHNOLOGY (ADIT)"
 
-    # Prepare data for the chart
-    grade_labels = [entry['grade'] for entry in grade_counts_data]
-    grade_counts = [entry['count'] for entry in grade_counts_data]
+        print(subject, year, branch, type)
 
-    context = {
-        'students_grade' : students_grade,
-        'students_grade_exists': students_grade.exists(),
-        'grade_counts_data' : grade_counts_data,
-        'grade_labels' : grade_labels,
-        'grade_counts' : grade_counts
-    }
-    return render(request, 'subject_data.html', context)
+        students_grade = GradeData.objects.filter(
+                                                subject__subject_name=subject,
+                                                student_exam__exam_data__academic_year=year,
+                                                student_exam__student_info__branch__branch_name=branch,
+                                                student_exam__student_info__college__college_name=college,
+                                                student_exam__exam_data__exam_type=type,
+                                                ).select_related(
+                                                'student_exam__student_info__branch',
+                                                'student_exam__exam_data',
+                                                ).order_by('student_exam__student_info__enrollment')
+        # Grade counting
+        grade_counts_data = students_grade.values("grade").annotate(count=Count("grade")).order_by("grade")
+
+        # Prepare data for the chart
+        grade_labels = [entry['grade'] for entry in grade_counts_data]
+        grade_counts = [entry['count'] for entry in grade_counts_data]
+
+        context = {
+            'students_grade' : students_grade,
+            'students_grade_exists': students_grade.exists(),
+            'grade_counts_data' : grade_counts_data,
+            'grade_labels' : grade_labels,
+            'grade_counts' : grade_counts
+        }
+        return render(request, 'subject_data.html', context)
+    
+    else:
+        return redirect("student")
 
 
 # Semester wise search template render view.
@@ -181,65 +193,75 @@ def semester(request):
 
 
 # Semester-wise analysis view
-def semester_analysis_view(request, semester, year, branch, college, type):
+def semester_analysis_view(request):
 
-    # Format semester to match database value
-    semester = "SEMESTER " + semester
+    if request.method == "GET":
+        year = request.GET.get('year')
+        branch = request.GET.get('branch')
+        type = request.GET.get('exam_type')
+        # static field
+        college = "A D PATEL INSTITUTE OF TECHNOLOGY (ADIT)"
 
-    # Fetch the first matching ExamData object
-    exam_data = ExamData.objects.filter(
-        semester=semester,
-        academic_year=year,
-        branch__branch_name=branch,
-        college__college_name=college,
-        exam_type=type,
-    ).first()
+        # Format semester to match database value
+        semester = "SEMESTER " + request.GET.get('semester')
 
-    # Handle case where no matching exam data exists
-    if not exam_data:
-        return render(request, "semester_data.html", {"error": "No data found for the selected semester."})
+        # Fetch the first matching ExamData object
+        exam_data = ExamData.objects.filter(
+            semester=semester,
+            academic_year=year,
+            branch__branch_name=branch,
+            college__college_name=college,
+            exam_type=type,
+        ).first()
 
-    # Extract exam name and declaration date
-    exam_name = exam_data.exam_name
-    declaration_date = exam_data.declaration_date
+        # Handle case where no matching exam data exists
+        if not exam_data:
+            return render(request, "semester_data.html", {"error": "No data found for the selected semester."})
 
-    # Fetch all StudentExam objects for the given exam data
-    student_exams = StudentExam.objects.filter(exam_data=exam_data).order_by('student_info__enrollment')
+        # Extract exam name and declaration date
+        exam_name = exam_data.exam_name
+        declaration_date = exam_data.declaration_date
 
-    # Fetch GradeData and all unique subjects for the given student exams
-    grade_data = GradeData.objects.filter(student_exam__in=student_exams).select_related('subject', 'student_exam')
-    subjects = Subject.objects.filter(gradedata__student_exam__in=student_exams).distinct()
-    subject_names = list(subjects.values_list('subject_name', flat=True))  # List of all subject names
-    subject_ids = list(subjects.values_list('id', flat=True))  # List of subject IDs for mapping grades
+        # Fetch all StudentExam objects for the given exam data
+        student_exams = StudentExam.objects.filter(exam_data=exam_data).order_by('student_info__enrollment')
 
-    # Prepare data for student grades
-    student_grades = []
-    for student_exam in student_exams:
-        student = student_exam.student_info  # Assuming StudentExam has a ForeignKey to Student
+        # Fetch GradeData and all unique subjects for the given student exams
+        grade_data = GradeData.objects.filter(student_exam__in=student_exams).select_related('subject', 'student_exam')
+        subjects = Subject.objects.filter(gradedata__student_exam__in=student_exams).distinct()
+        subject_names = list(subjects.values_list('subject_name', flat=True))  # List of all subject names
+        subject_ids = list(subjects.values_list('id', flat=True))  # List of subject IDs for mapping grades
 
-        # Initialize grades dictionary with "-" for all subjects
-        grades = {subject_id: "-" for subject_id in subject_ids}
+        # Prepare data for student grades
+        student_grades = []
+        for student_exam in student_exams:
+            student = student_exam.student_info  # Assuming StudentExam has a ForeignKey to Student
 
-        # Map grades for the student
-        for grade in grade_data.filter(student_exam=student_exam):
-            grades[grade.subject.id] = grade.grade  # Assign grade for the specific subject
+            # Initialize grades dictionary with "-" for all subjects
+            grades = {subject_id: "-" for subject_id in subject_ids}
 
-        # Append student data with grades to the list
-        student_grades.append({
-            'enrollment': student.enrollment,  
-            'student_name': student.name, 
-            'grades': [grades[subject_id] for subject_id in subject_ids],  # Map grades in subject order
-        })
+            # Map grades for the student
+            for grade in grade_data.filter(student_exam=student_exam):
+                grades[grade.subject.id] = grade.grade  # Assign grade for the specific subject
 
-    # Context for rendering the template
-    context = {
-        'semester': semester,
-        'year': year,
-        'exam_name': exam_name,
-        'declaration_date': declaration_date,
-        'type': type,
-        'subjects': subject_names,  # Subject names to display in table headers
-        'student_grades': student_grades,  # Student grades to display in rows
-    }
+            # Append student data with grades to the list
+            student_grades.append({
+                'enrollment': student.enrollment,  
+                'student_name': student.name, 
+                'grades': [grades[subject_id] for subject_id in subject_ids],  # Map grades in subject order
+            })
 
-    return render(request, "semester_data.html", context)
+        # Context for rendering the template
+        context = {
+            'semester': semester,
+            'year': year,
+            'exam_name': exam_name,
+            'declaration_date': declaration_date,
+            'type': type,
+            'subjects': subject_names,  # Subject names to display in table headers
+            'student_grades': student_grades,  # Student grades to display in rows
+        }
+
+        return render(request, "semester_data.html", context)
+    
+    else:
+        return redirect("semester")
